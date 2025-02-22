@@ -5,20 +5,22 @@ db = SQLAlchemy()
 
 
 class User(db.Model):
+    __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     auth0_id = db.Column(db.String(100), unique=True, nullable=False)
     username = db.Column(db.String(100), nullable=False)
 
     topics = db.relationship(
-        "Topic", back_populates="user", cascade="all, delete-orphan")
+        "Record", back_populates="user", cascade="all, delete-orphan")
 
     def to_dict(self):
-        return {"id": self.id, "username": self.username, "password": self.password}
+        return {"id": self.id, "username": self.username, "auth0_id": self.auth0_id}
 
 
 class Record(db.Model):
+    __tablename__ = 'records'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     topic_name = db.Column(db.String(100), nullable=False)
     contentScore = db.Column(db.Integer, nullable=False)
     confidenceScore = db.Column(db.Integer, nullable=False)
@@ -32,5 +34,9 @@ class Record(db.Model):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "name": self.name
+            "topic": self.topic_name,
+            "contentScore": self.contentScore,
+            "confidenceScore": self.confidenceScore,
+            "score": self.score,
+            "created_at": self.created_at
         }

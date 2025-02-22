@@ -5,4 +5,4 @@ from .record_routes import record_bp
 
 def register_routes(app):
     app.register_blueprint(user_bp)
-    app.regiser_blueprint(record_bp)
+    app.register_blueprint(record_bp)

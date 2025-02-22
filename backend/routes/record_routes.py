@@ -20,13 +20,15 @@ def manage_records():
         username = data.get("username")
         topic = data.get("topic")
         contentScore = data.get("contentScore")
-        confidenceScore = data.get("ConfidenceScore")
+        confidenceScore = data.get("confidenceScore")
         totalScore = (contentScore + confidenceScore) // 2
         if not username and not topic:
             return jsonify({"error": "Invalid username or topic"}), 400
-        user = User.query.filter_by(username=username)
-        record = Record(user_id=user, topic=topic, contentScore=contentScore,
-                        confidenceScore=confidenceScore, totalScore=totalScore)
+        user = User.query.filter_by(username=username).first()
+        if not user:
+            return jsonify({"error": "User does not exist"}), 400
+        record = Record(user_id=user.id, topic_name=topic, contentScore=contentScore,
+                        confidenceScore=confidenceScore, score=totalScore)
         db.session.add(record)
         db.session.commit()
 
