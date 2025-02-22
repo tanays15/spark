@@ -1,16 +1,17 @@
 // pages/profile.js
 import React, { useEffect } from 'react';
-import { Box, Container, Typography } from '@mui/material';
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
-import Navbar from '../components/Navbar'; // Import the Navbar component
+import Navbar from '../components/Navbar';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
+import { Typography } from "@mui/material"
+import { Box } from "@mui/system";
 
 const ProfilePage = () => {
     const { handleRedirectCallback, isAuthenticated } = useAuth0();
     const location = useLocation();
     const navigate = useNavigate();
 
-    // Handling the redirect callback after login
     useEffect(() => {
         const handleAuthRedirect = async () => {
             if (location.search.includes('code=') && location.search.includes('state=')) {
@@ -35,20 +36,43 @@ const ProfilePage = () => {
             </Box>
         );
     }
+    // this data will be from the api
+    const data = [
+        { id: 1, name: "Alice", age: 25, city: "New York" },
+        { id: 2, name: "Bob", age: 30, city: "Los Angeles" },
+        { id: 3, name: "Charlie", age: 28, city: "Chicago" },
+    ];
 
     return (
         <div>
-            <Navbar /> {/* Navbar at the top, fully stretched */}
-
-            {/* Page Content - Adding margin to prevent overlap with navbar */}
-            <Container sx={{ mt: 12 }}> {/* Adjust margin-top to avoid navbar overlap */}
-                <Typography variant="h4" gutterBottom>
-                    Your Profile
-                </Typography>
-                <Typography variant="body1">
-                    Here you will see your user data, including graphs and stats.
-                </Typography>
-            </Container>
+            <Navbar />
+            <Box display="flex" justifyContent="center" alignItems="flex-start" sx={{ height: 'calc(100vh - 75px)', width: '100vw' }}>
+                <TableContainer component={Paper} sx={{ width: '90%', padding: 3 }}>
+                    <Typography variant="h4" sx={{ padding: 2, textAlign: 'center', backgroundColor: '#1976d2', color: 'white', mb: 2 }}>
+                        User Topics
+                    </Typography>
+                    <Table sx={{ width: '100%' }} aria-label="simple table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', width: 'auto' }}>ID</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', width: 'auto' }}>Name</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', width: 'auto' }}>Age</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', width: 'auto' }}>City</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {data.map((row) => (
+                                <TableRow key={row.id}>
+                                    <TableCell sx={{ fontSize: '1rem', width: '25%' }}>{row.id}</TableCell>
+                                    <TableCell sx={{ fontSize: '1rem', width: '25%' }}>{row.name}</TableCell>
+                                    <TableCell sx={{ fontSize: '1rem', width: '25%' }}>{row.age}</TableCell>
+                                    <TableCell sx={{ fontSize: '1rem', width: '25%' }}>{row.city}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Box>
         </div>
     );
 };
