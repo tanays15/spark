@@ -38,42 +38,44 @@ class face_analysis():
 
         # Initialize face mesh
         with mp_face_mesh.FaceMesh(min_detection_confidence=0.5, min_tracking_confidence=0.5) as face_mesh:
-            for frame in frames:
+            for i, frame in enumerate(frames):
 
-                if frame is None:
-                    print("Error: Encountered an empty frame.")
-                    continue  # Skip this frame to avoid errors
+                if (i % 20 == 0):
 
-                # Convert to RGB for MediaPipe
-                rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    if frame is None:
+                        print("Error: Encountered an empty frame.")
+                        continue  # Skip this frame to avoid errors
 
-                # Process the frame to detect landmarks
-                results = face_mesh.process(rgb_frame)
+                    # Convert to RGB for MediaPipe
+                    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-                # If landmarks are detected
-                if results.multi_face_landmarks:
-                    for landmarks in results.multi_face_landmarks:
+                    # Process the frame to detect landmarks
+                    results = face_mesh.process(rgb_frame)
 
-                        mp_drawing.draw_landmarks(frame, landmarks, mp_face_mesh.FACEMESH_CONTOURS)
+                    # If landmarks are detected
+                    if results.multi_face_landmarks:
+                        for landmarks in results.multi_face_landmarks:
+
+                            mp_drawing.draw_landmarks(frame, landmarks, mp_face_mesh.FACEMESH_CONTOURS)
 
 
-                        # Get the positions of the eyes (specific points from the face mesh landmarks)
-                        left_eye = landmarks.landmark[33]  # Left eye center
-                        right_eye = landmarks.landmark[263]  # Right eye center
+                            # Get the positions of the eyes (specific points from the face mesh landmarks)
+                            left_eye = landmarks.landmark[33]  # Left eye center
+                            right_eye = landmarks.landmark[263]  # Right eye center
 
-                        # Calculate the gaze direction based on the relative position of the eyes
-                        eye_center_x = (left_eye.x + right_eye.x) / 2
-                        eye_center_y = (left_eye.y + right_eye.y) / 2
+                            # Calculate the gaze direction based on the relative position of the eyes
+                            eye_center_x = (left_eye.x + right_eye.x) / 2
+                            eye_center_y = (left_eye.y + right_eye.y) / 2
 
-                        # Normalize gaze direction to the center of the screen
-                        gaze_direction = (int((eye_center_x - 0.5) * frame.shape[1] * 2), 
-                                        int((eye_center_y - 0.5) * frame.shape[0] * 2))
-                        
-                        gaze_dir.append(gaze_direction)
+                            # Normalize gaze direction to the center of the screen
+                            gaze_direction = (int((eye_center_x - 0.5) * frame.shape[1] * 2), 
+                                            int((eye_center_y - 0.5) * frame.shape[0] * 2))
+                            
+                            gaze_dir.append(gaze_direction)
 
-                # Press 'q' to exit
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
+                    # Press 'q' to exit
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                        break
 
 
         transposed = zip(*gaze_dir)
@@ -122,22 +124,22 @@ class face_analysis():
         hands = mp_hands.Hands(static_image_mode=False, max_num_hands=2, min_detection_confidence=0.5)
         database = []
 
-        for frame in frames:
+        for j, frame in enumerate(frames):
+            if (j % 20 == 0):
+                frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                results = hands.process(frame_rgb)
 
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            results = hands.process(frame_rgb)
 
+                if results.multi_hand_landmarks:
+                    frame_data = [None, None]  # Ensure 2 hands per frame (Right, Left)
 
-            if results.multi_hand_landmarks:
-                frame_data = [None, None]  # Ensure 2 hands per frame (Right, Left)
+                    for i, hand_landmarks in enumerate(results.multi_hand_landmarks):
+                    # Extract keypoints (21 per hand)
+                        if i < 2:
+                            hand_points = [(lm.x, lm.y, lm.z) for lm in hand_landmarks.landmark]
+                            frame_data[i] = hand_points  # Assign to correct hand slot
 
-                for i, hand_landmarks in enumerate(results.multi_hand_landmarks):
-                # Extract keypoints (21 per hand)
-                    if i < 2:
-                        hand_points = [(lm.x, lm.y, lm.z) for lm in hand_landmarks.landmark]
-                        frame_data[i] = hand_points  # Assign to correct hand slot
-
-                database.append(frame_data)  # Append the fixed-length frame data
+                    database.append(frame_data)  # Append the fixed-length frame data
         database_np = np.array([[h if h is not None else np.zeros((21, 3)) for h in frame] for frame in database])
 
         averages = np.mean(database_np, axis=0)
