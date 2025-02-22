@@ -87,7 +87,7 @@ const ProfilePage = () => {
             if (location.search.includes("code=") && location.search.includes("state=")) {
                 try {
                     await handleRedirectCallback();
-                    navigate("/profile");
+                    navigate( "/profile");
                 } catch (error) {
                     console.error("Error during redirect callback:", error);
                 }
