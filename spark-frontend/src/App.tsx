@@ -4,6 +4,8 @@ import AuthPage from './pages/AuthPage';
 import MainPage from './pages/MainPage';
 import ProfilePage from './pages/ProfilePage';
 import React from 'react'
+import { ThemeProvider, CssBaseline } from "@mui/material";
+import theme from "./theme"; // Import theme file
 
 function App() {
     return (
