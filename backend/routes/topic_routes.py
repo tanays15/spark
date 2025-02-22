@@ -1,7 +1,12 @@
 from flask import Blueprint, request, jsonify
-from models import db, User, Topic
+from models import Record, db, User, Topic
 
 user_bp = Blueprint("user_bp", __name__)
+
+
+def get_records_per_topic(topic_id):
+    records = Record.query.filter_by(topic_id=topic_id).all()
+    return [record.to_dict() for record in records]
 
 
 @user_bp.route("/topics", methods=["POST"])
