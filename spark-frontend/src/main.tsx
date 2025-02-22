@@ -12,6 +12,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         authorizationParams={{
             redirect_uri: "http://localhost:5173/profile"  // Redirect to home page after login
         }}
+        cacheLocation='localstorage'
     >
         <BrowserRouter>
             <App />
