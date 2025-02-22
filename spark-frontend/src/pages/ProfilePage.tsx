@@ -1,5 +1,5 @@
-// pages/profile.js
-import React, { useEffect } from 'react';
+import {useEffect} from "react";
+import React, { useEffect } from 'react'
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import Navbar from '../components/Navbar';
@@ -8,18 +8,50 @@ import { Typography } from "@mui/material"
 import { Box } from "@mui/system";
 
 const ProfilePage = () => {
-    const { handleRedirectCallback, isAuthenticated } = useAuth0();
+    const { handleRedirectCallback, isAuthenticated, user, getAccessTokenSilently } = useAuth0();
     const location = useLocation();
     const navigate = useNavigate();
 
+    // Send user data to backend after sign-up
+    useEffect(() => {
+        const sendUserData = async () => {
+            if (isAuthenticated && user) {
+                try {
+                    const token = await getAccessTokenSilently(); // Get Auth0 access token (if needed)
+                    const response = await fetch("http://your-backend.com/api/users", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({
+                            email: user.email,
+                            name: user.name,
+                            sub: user.sub, // Auth0 user ID
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        console.error("Failed to send user data");
+                    }
+                } catch (error) {
+                    console.error("Error sending user data:", error);
+                }
+            }
+        };
+
+        sendUserData();
+    }, [isAuthenticated, user, getAccessTokenSilently]);
+
+    // Handle authentication redirect
     useEffect(() => {
         const handleAuthRedirect = async () => {
-            if (location.search.includes('code=') && location.search.includes('state=')) {
+            if (location.search.includes("code=") && location.search.includes("state=")) {
                 try {
                     await handleRedirectCallback();
-                    navigate('/profile');
+                    navigate("/profile");
                 } catch (error) {
-                    console.error('Error during redirect callback:', error);
+                    console.error("Error during redirect callback:", error);
                 }
             }
         };
@@ -73,8 +105,7 @@ const ProfilePage = () => {
                     </Table>
                 </TableContainer>
             </Box>
-        </div>
-    );
-};
+        </div>)
+    };
 
 export default ProfilePage;
