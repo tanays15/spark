@@ -80,7 +80,6 @@ const LandingPage: React.FC = () => {
                         <Typography variant="subtitle1" sx={{ mb: 4 }}>
                             Know what you know, master what you don't
                         </Typography>
->>>>>>> landingPage_frontend
 
                         {/* Login Button - Sends user to Auth0 for authentication */}
                         <Button
