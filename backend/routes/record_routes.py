@@ -12,8 +12,11 @@ def manage_records():
         topic = request.args.get('topic')
         if not username and not topic:
             return jsonify({"error": "Invalid username or topic"}), 400
-        user = User.query.filter_by(username=username)
-        records = Record.query.filter_by(user_id=user, topic=topic).all()
+        user = User.query.filter_by(username=username).first()
+        if not user:
+            return jsonify({"error": "User does not exist"})
+        records = Record.query.filter_by(
+            user_id=user.id, topic_name=topic).all()
         return jsonify([record.to_dict() for record in records]), 200
     elif request.method == "POST":
         data = request.get_json()
