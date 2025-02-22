@@ -17,7 +17,7 @@ const ProfilePage = () => {
             if (isAuthenticated && user) {
                 try {
                     const token = await getAccessTokenSilently(); // Get Auth0 access token (if needed)
-                    const response = await fetch("http://your-backend.com/api/users", {
+                    const response = await fetch("http://localhost:5000/users", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -48,7 +48,7 @@ const ProfilePage = () => {
             if (location.search.includes("code=") && location.search.includes("state=")) {
                 try {
                     await handleRedirectCallback();
-                    navigate("/profile");
+                    navigate( "/profile");
                 } catch (error) {
                     console.error("Error during redirect callback:", error);
                 }
