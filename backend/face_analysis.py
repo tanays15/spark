@@ -157,13 +157,4 @@ class face_analysis():
             return 0
         motion_score = 100 - (total_distance/len(database))
         return min(motion_score, 97.234234)
-        
-
-
-          
-        
-
-if __name__ == "__main__":
-            analysis = face_analysis()
-            print(analysis.final_rating("4962731-hd_1280_720_25fps.mp4"))
 
