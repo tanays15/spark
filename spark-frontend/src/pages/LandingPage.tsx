@@ -114,19 +114,19 @@ const LandingPage: React.FC = () => {
                         justifyContent: "center",
                         alignItems: "center",
                         height: "100%",
-                        p: 3
+                        p: 3,
                     }}>
                         <Paper
                             elevation={3}
                             sx={{
-                                width: "90%",
-                                maxWidth: "500px",
-                                height: "90%", // Increased height for a longer slide
+                                width: "100%",
+                                //maxWidth: "500px",
+                                height: "95%", // Increased height for a longer slide
                                 p: 3,
-                                bgcolor: "#f5f5f5",
+                                bgcolor: "#afafaf",
                                 color: "black",
                                 textAlign: "center",
-                                border: "10px solid #370173",
+                                border: "7px solid #370173",
                                 position: "relative",
                                 overflow: "hidden",
                             }}
