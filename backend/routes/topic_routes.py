@@ -1,10 +1,10 @@
 from flask import Blueprint, request, jsonify
 from models import Record, db, User, Topic
 
-user_bp = Blueprint("user_bp", __name__)
+topic_bp = Blueprint("topic_bp", __name__)
 
 
-@user_bp.route("/topics", methods=["POST"])
+@topic_bp.route("/topics", methods=["POST", "GET"])
 def manage_topic():
     if request.method == "POST":
         data = request.get_json()
@@ -14,11 +14,15 @@ def manage_topic():
         if not topic_name or not username:
             return jsonify({"error": "topic name or username are invalid"}), 400
 
-        existing_topic = Topic.query.filter_by(name=topic_name).first()
+        user = User.query.filter_by(username=username).first()
+        if not user:
+            return jsonify({"error": "user does not exist"}), 400
+        existing_topic = Topic.query.filter_by(
+            name=topic_name, user_id=user.id).first()
         if existing_topic:
             return jsonify({"error": "topic already exists"}), 400
 
-        new_topic = Topic(name=topic_name)
+        new_topic = Topic(name=topic_name, user_id=user.id)
         db.session.add(new_topic)
         db.session.commit()
 
