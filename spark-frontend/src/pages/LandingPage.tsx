@@ -10,7 +10,6 @@ const LandingPage = () => {
                 height="100vh"
                 alignItems="center"
                 justifyContent="center"
-                bgcolor="black"
                 color="white"
             >
                 {/* Left side: Branding and login buttons */}
