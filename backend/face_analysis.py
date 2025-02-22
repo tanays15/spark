@@ -99,20 +99,22 @@ class face_analysis():
      
      def emotion_rating(self, frames):
         score = 0
-        for frame in frames:
-            result = DeepFace.analyze(frame, actions = ['emotion'], enforce_detection=False)
-            emotions = []
-            emotions.append(result[0]['emotion']['angry'] * .75)
-            emotions.append(result[0]['emotion']['disgust'] * .6)
-            emotions.append(result[0]['emotion']['fear'] * .5)
-            emotions.append(result[0]['emotion']['happy'] * .9)
-            emotions.append(result[0]['emotion']['sad'] * .9)
-            emotions.append(result[0]['emotion']['surprise'] * .65)
-            emotions.append(result[0]['emotion']['neutral'] * 1.2)
-            score += sum(emotions)
+        for i, frame in enumerate(frames):
+            if (i % 20 == 0):
+                result = DeepFace.analyze(frame, actions = ['emotion'], enforce_detection=False)
+                emotions = []
+                emotions.append(result[0]['emotion']['angry'] * .75)
+                emotions.append(result[0]['emotion']['disgust'] * .6)
+                emotions.append(result[0]['emotion']['fear'] * .5)
+                emotions.append(result[0]['emotion']['happy'] * .9)
+                emotions.append(result[0]['emotion']['sad'] * .9)
+                emotions.append(result[0]['emotion']['surprise'] * .65)
+                emotions.append(result[0]['emotion']['neutral'] * 1.2)
+                score += sum(emotions)
+
         if (len(frames) == 0):
             return 0
-        return min(score/len(frames), 92.587345638)
+        return min(score/(len(frames) / 20), 92.587345638)
      
      def motion_rating(self, frames):
         
@@ -155,5 +157,4 @@ class face_analysis():
             return 0
         motion_score = 100 - (total_distance/len(database))
         return min(motion_score, 97.234234)
-        
 
