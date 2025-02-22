@@ -1,2 +1,6 @@
+<<<<<<< HEAD
+=======
+backend/__pycache__
+>>>>>>> origin/feat/profile-page
 __pycache__/
 backend/venv
