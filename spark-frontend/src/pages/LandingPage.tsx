@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Box, Button, Typography, Container, Grid, Paper, Slide } from "@mui/material";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useTheme } from '@mui/material/styles';
 
 const slides = [
     {
@@ -20,28 +19,43 @@ const slides = [
 
 const LandingPage: React.FC = () => {
     const { loginWithRedirect } = useAuth0();
-    const theme = useTheme();
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [slideIn, setSlideIn] = useState(true);
     const [slideDirection, setSlideDirection] = useState<"left" | "right">("left");
 
     // Auto-scrolling functionality
     useEffect(() => {
         const intervalId = setInterval(() => {
             setSlideDirection("left");
-            setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
-        }, 5000); // Change slide every 5 seconds
+            setSlideIn(false); // Trigger slide-out animation
+
+            setTimeout(() => {
+                setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
+                setSlideIn(true); // Trigger slide-in animation
+            }, 400); // Wait for slide-out animation to complete
+        }, 15000); // Change slide every 5 seconds
 
         return () => clearInterval(intervalId); // Clean up on component unmount
     }, []);
 
     const handleNext = () => {
         setSlideDirection("left");
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
+        setSlideIn(false); // Trigger slide-out animation
+
+        setTimeout(() => {
+            setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
+            setSlideIn(true); // Trigger slide-in animation
+        }, 500); // Wait for slide-out animation to complete
     };
 
     const handlePrev = () => {
         setSlideDirection("right");
-        setCurrentIndex((prevIndex) => (prevIndex - 1 + slides.length) % slides.length);
+        setSlideIn(false); // Trigger slide-out animation
+
+        setTimeout(() => {
+            setCurrentIndex((prevIndex) => (prevIndex - 1 + slides.length) % slides.length);
+            setSlideIn(true); // Trigger slide-in animation
+        }, 500); // Wait for slide-out animation to complete
     };
 
     return (
@@ -84,7 +98,7 @@ const LandingPage: React.FC = () => {
                             variant="contained"
                             size="large"
                             fullWidth
-                            sx={{ backgroundColor: "#005e0d", maxWidth: "400px", fontFamily: "Arial", fontSize: 15 }}
+                            sx={{ backgroundColor: "#370173", maxWidth: "400px", fontFamily: "Arial", fontSize: 15 }}
                             onClick={() =>
                                 loginWithRedirect({
                                     authorizationParams: { screen_hint: "signup" },
@@ -108,18 +122,17 @@ const LandingPage: React.FC = () => {
                             sx={{
                                 width: "90%",
                                 maxWidth: "500px",
-                                height: "80%",
+                                height: "90%", // Increased height for a longer slide
                                 p: 3,
                                 bgcolor: "#f5f5f5",
                                 color: "black",
                                 textAlign: "center",
-                                border: "5px solid #005e0d",
-                                borderRadius: 3,
+                                border: "10px solid #370173",
                                 position: "relative",
                                 overflow: "hidden",
                             }}
                         >
-                            <Slide direction={slideDirection} in={true} timeout={500}>
+                            <Slide direction={slideDirection} in={slideIn} timeout={500}>
                                 <div
                                     style={{
                                         position: "absolute",
@@ -128,7 +141,7 @@ const LandingPage: React.FC = () => {
                                         width: "100%",
                                         height: "100%",
                                         padding: "20px",
-                                        boxSizing: "border-box", // Ensure padding is included in the height
+                                        boxSizing: "border-box", // Ensures padding is included in the height
                                     }}
                                 >
                                     <Typography variant="h3" fontWeight="bold" gutterBottom sx={{ fontFamily: "Helvetica Neue" }}>
@@ -138,14 +151,18 @@ const LandingPage: React.FC = () => {
                                         {slides[currentIndex].content}
                                     </Typography>
                                     <Typography
-                                        variant="h5"
+                                        variant="body1"
                                         fontWeight="medium"
                                         sx={{
+                                            position: "absolute",
+                                            bottom: "25px",
+                                            left: "50%",
+                                            transform: "translateX(-50%)",
                                             fontFamily: "Helvetica Neue",
-                                            fontSize: 25,
+                                            fontSize: 18,
                                             cursor: 'pointer',
                                             color: '#3874cb',
-                                            textDecoration: 'underline'
+                                            textDecoration: 'underline',
                                         }}
                                         onClick={() =>
                                             loginWithRedirect({
@@ -157,17 +174,36 @@ const LandingPage: React.FC = () => {
                                     </Typography>
 
                                     {/* Navigation buttons */}
-                                    <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
+                                    <Box
+                                        sx={{
+                                            mt: 2,
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            position: "absolute",
+                                            bottom: 16,
+                                            left: 16,
+                                            right: 16,
+                                        }}
+                                    >
                                         <Button
                                             onClick={handlePrev}
                                             variant="contained"
-                                            sx={{ mr: 2 }}
+                                            size="small"
+                                            sx={{
+                                                fontSize: "6",
+                                                padding: "4px 12px",
+                                            }}
                                         >
                                             Previous
                                         </Button>
                                         <Button
                                             onClick={handleNext}
                                             variant="contained"
+                                            size="small"
+                                            sx={{
+                                                fontSize: "6",
+                                                padding: "4px 12px",
+                                            }}
                                         >
                                             Next
                                         </Button>
