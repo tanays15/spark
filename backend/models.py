@@ -9,10 +9,10 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     auth0_id = db.Column(db.String(100), unique=True, nullable=False)
     username = db.Column(db.String(100), nullable=False)
+    topics = db.relationship(
+        "Topic", back_populates="user", cascade="all, delete-orphan")  # Fix here
     records = db.relationship(
-        "Topic", back_populates="User", cascade="all, delete-orphan")
-    records = db.relationship(
-        "Record", back_populates="User", cascade="all, delete-orphan")
+        "Record", back_populates="user", cascade="all, delete-orphan")
 
     def to_dict(self):
         return {"id": self.id, "username": self.username, "auth0_id": self.auth0_id}
@@ -22,8 +22,10 @@ class Topic(db.Model):
     __tablename__ = 'topics'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     records = db.relationship(
         "Record", back_populates="topic", cascade="all, delete-orphan")
+    user = db.relationship("User", back_populates="topics")  # Fix here
 
     def to_dict(self):
         avg_content = sum(record.contentScore for record in self.records)
@@ -53,8 +55,8 @@ class Record(db.Model):
     created_at = db.Column(db.DateTime(timezone=True),
                            server_default=func.now())
 
-    user = db.relationship("User", back_populates="records")
-    topic = db.relationship("Topic", back_populates="records")
+    user = db.relationship("User", back_populates="records")  # Fix here
+    topic = db.relationship("Topic", back_populates="records")  # Fix here
 
     def to_dict(self):
         return {
