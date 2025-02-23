@@ -3,7 +3,7 @@
 SPARK is a web application designed to evaluate users' confidence levels when explaining a topic. It utilizes audio, visual, and textual analysis to generate a confidence score and track progress over time.
 
 ## Features
-- **Audio Analysis:** Measures confidence based on pitch, tone, speech rate, and stuttering using **Librosa** and **Silero VAD**.
+- **Audio Analysis:** Measures confidence based on pitch, tone, speech rate, and stuttering using **Librosa**
 - **Speech-to-Text Conversion:** Uses **OpenAI Whisper API** for transcription.
 - **Textual Analysis:** Assesses content correctness with the **GPT API**.
 - **Visual Analysis:** Detects facial expressions and behavioral signals (e.g., hand fidgeting) using **OpenCV**.
