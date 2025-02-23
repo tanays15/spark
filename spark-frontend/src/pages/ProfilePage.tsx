@@ -27,12 +27,11 @@ const ProfilePage = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    // Send user data to backend after sign-up
     useEffect(() => {
         const sendUserData = async () => {
             if (isAuthenticated && user) {
                 try {
-                    const token = await getAccessTokenSilently(); // Get Auth0 access token (if needed)
+                    const token = await getAccessTokenSilently();
                     const response = await fetch("http://127.0.0.1:5000/users", {
                         method: "POST",
                         headers: {
@@ -41,7 +40,7 @@ const ProfilePage = () => {
                         },
                         body: JSON.stringify({
                             username: user.name,
-                            auth0_id: user.sub, // Auth0 user ID
+                            auth0_id: user.sub,
                         }),
                     });
 
@@ -57,7 +56,6 @@ const ProfilePage = () => {
         sendUserData();
     }, [isAuthenticated, user, getAccessTokenSilently]);
 
-    // Fetch topics only after authentication
     useEffect(() => {
         const fetchData = async () => {
             if (isAuthenticated && user) {
@@ -79,9 +77,8 @@ const ProfilePage = () => {
         };
 
         fetchData();
-    }, [isAuthenticated, user]); // Only runs when authentication status or user changes
+    }, [isAuthenticated, user]);
 
-    // Handle authentication redirect
     useEffect(() => {
         const handleAuthRedirect = async () => {
             if (location.search.includes("code=") && location.search.includes("state=")) {
@@ -123,48 +120,51 @@ const ProfilePage = () => {
                 justifyContent="center"
                 alignItems="flex-start"
                 sx={{ height: "calc(100vh - 75px)", width: "100vw" }}
+                backgroundColor="#121829"
             >
-                <TableContainer component={Paper} sx={{ width: "90%", padding: 3 }}>
+                <TableContainer component={Paper} sx={{ width: "90%", marginTop: 5, backgroundColor: "#1B2034"}}>
                     <Typography
                         variant="h4"
                         sx={{
                             padding: 2,
                             textAlign: "center",
-                            backgroundColor: "#1976d2",
+                            backgroundColor: "#61749e",
                             color: "white",
                             mb: 2,
+                            fontWeight: "bold",
+                            fontFamily: "Segoe UI Symbol",
                         }}
                     >
                         Topics
                     </Typography>
-                    <Table sx={{ width: "100%" }} aria-label="simple table">
+                    <Table sx={{ width: "100%", borderRadius: 7}} aria-label="simple table">
                         <TableHead>
-                            <TableRow>
-                                <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", textAlign: "center" }}>Name</TableCell>
-                                <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", textAlign: "center" }}>Avg Content Score</TableCell>
-                                <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", textAlign: "center" }}>Avg Confidence Score</TableCell>
-                                <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", textAlign: "center" }}>Avg Score</TableCell>
-                                <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", textAlign: "center" }}>Record Count</TableCell>
+                            <TableRow sx={{ backgroundColor: "#262C44" }}>
+                                <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", textAlign: "center", color: "white" }}>Name</TableCell>
+                                <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", textAlign: "center", color: "white" }}>Avg Content Score</TableCell>
+                                <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", textAlign: "center", color: "white" }}>Avg Confidence Score</TableCell>
+                                <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", textAlign: "center", color: "white" }}>Avg Score</TableCell>
+                                <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", textAlign: "center", color: "white" }}>Record Count</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {data && data.length > 0 ? (
                                 data.map((row) => (
-                                    <TableRow key={row.id}>
-                                        <TableCell sx={{ fontSize: "1rem", textAlign: "center" }}>
-                                            <Link to={`/analytics/${row.name}`} style={{ textDecoration: 'underline', color: 'inherit' }}>
+                                    <TableRow key={row.id} sx={{ backgroundColor: "#1B2034" }}>
+                                        <TableCell sx={{ fontSize: "1rem", textAlign: "center", color: "white"}}>
+                                            <Link to={`/analytics/${row.name}`} style={{ textDecoration: 'underline', color: '#4FC3F7' }}>
                                                 {row.name}
                                             </Link>
                                         </TableCell>
-                                        <TableCell sx={{ fontSize: "1rem", textAlign: "center" }}>{row.avg_content_score.toFixed(2)}</TableCell>
-                                        <TableCell sx={{ fontSize: "1rem", textAlign: "center" }}>{row.average_confidence_score.toFixed(2)}</TableCell>
-                                        <TableCell sx={{ fontSize: "1rem", textAlign: "center" }}>{row.avg_score.toFixed(2)}</TableCell>
-                                        <TableCell sx={{ fontSize: "1rem", textAlign: "center" }}>{row.record_count}</TableCell>
+                                        <TableCell sx={{ fontSize: "1rem", textAlign: "center", color: "white" }}>{row.avg_content_score.toFixed(2)}</TableCell>
+                                        <TableCell sx={{ fontSize: "1rem", textAlign: "center", color: "white" }}>{row.average_confidence_score.toFixed(2)}</TableCell>
+                                        <TableCell sx={{ fontSize: "1rem", textAlign: "center", color: "white" }}>{row.avg_score.toFixed(2)}</TableCell>
+                                        <TableCell sx={{ fontSize: "1rem", textAlign: "center", color: "white" }}>{row.record_count}</TableCell>
                                     </TableRow>
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={6} sx={{ textAlign: "center" }}>No data available</TableCell>
+                                    <TableCell colSpan={6} sx={{ textAlign: "center", color: "white" }}>No data available</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>

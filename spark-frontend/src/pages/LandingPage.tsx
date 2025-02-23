@@ -74,16 +74,17 @@ const LandingPage: React.FC = () => {
                 alignItems: "center",
                 justifyContent: "center",
                 overflow: "hidden",
+                bgcolor: "#252525",
             }}
         >
             <Container maxWidth="xl" sx={{ height: "100%" }}>
                 <Grid container sx={{ height: "100%" }} alignItems="center">
                     {/* Left Side */}
                     <Grid item xs={12} md={6} sx={{ textAlign: "center" }}>
-                        <Typography variant="h2" fontWeight="bold" color="primary">
+                        <Typography variant="h2" fontWeight="bold" color="primary" sx={{ fontFamily: "Segoe UI Symbol"}}>
                             SPARK
                         </Typography>
-                        <Typography variant="subtitle1" sx={{ mb: 4 }}>
+                        <Typography variant="subtitle1" sx={{ paddingTop: 1, mb: 4, fontFamily: "Segoe UI Symbol"}}>
                             Know what you know, master what you don't
                         </Typography>
 
@@ -93,7 +94,7 @@ const LandingPage: React.FC = () => {
                             size="large"
                             color="primary"
                             fullWidth
-                            sx={{ mb: 2, maxWidth: "400px", fontSize: 15 }}
+                            sx={{ mb: 2, maxWidth: "400px", fontSize: 15, fontFamily: "Segoe UI Symbol", fontWeight: "medium"}}
                             onClick={() => loginWithRedirect()}
                         >
                             Login
@@ -104,7 +105,7 @@ const LandingPage: React.FC = () => {
                             variant="contained"
                             size="large"
                             fullWidth
-                            sx={{ backgroundColor: "#370173", maxWidth: "400px", fontFamily: "Arial", fontSize: 15 }}
+                            sx={{ backgroundColor: "#7e3ac9", maxWidth: "400px", fontFamily: "Segoe UI Symbol", fontSize: 15, fontWeight: "medium" }}
                             onClick={() =>
                                 loginWithRedirect({
                                     authorizationParams: { screen_hint: "signup" },
@@ -126,16 +127,16 @@ const LandingPage: React.FC = () => {
                         <Paper
                             elevation={3}
                             sx={{
-                                width: "100%",
-                                //maxWidth: "500px",
+                                width: "115%",
+                                maxWidth: "1300px",
                                 height: "95%", // Increased height for a longer slide
                                 p: 3,
-                                bgcolor: "#afafaf",
+                                bgcolor: "#252525",
                                 color: "black",
                                 textAlign: "center",
-                                border: "7px solid #370173",
+                                border: "2px solid #1c1c1c",
                                 position: "relative",
-                                overflow: "hidden",
+                                overflow: "auto",
                             }}
                         >
                             <Slide direction={slideDirection} in={slideIn} timeout={500}>
@@ -150,10 +151,10 @@ const LandingPage: React.FC = () => {
                                         boxSizing: "border-box", // Ensures padding is included in the height
                                     }}
                                 >
-                                    <Typography variant="h3" fontWeight="bold" gutterBottom sx={{ fontFamily: "Helvetica Neue" }}>
+                                    <Typography variant="h3" fontWeight="bold" gutterBottom sx={{ fontFamily: "Segoe UI Symbol", color: "white" }}>
                                         {slides[currentIndex].title}
                                     </Typography>
-                                    <Typography variant="body1" paragraph sx={{ fontFamily: "Helvetica Neue" }}>
+                                    <Typography variant="body1" paragraph sx={{ fontFamily: "Segoe UI Symbol", color: "white"  }}>
                                         {slides[currentIndex].content}
                                     </Typography>
                                     <Typography
@@ -198,6 +199,8 @@ const LandingPage: React.FC = () => {
                                             sx={{
                                                 fontSize: "6",
                                                 padding: "4px 12px",
+                                                fontFamily: "Segoe UI Symbol",
+                                                fontWeight: "medium",
                                             }}
                                         >
                                             Previous
@@ -209,6 +212,8 @@ const LandingPage: React.FC = () => {
                                             sx={{
                                                 fontSize: "6",
                                                 padding: "4px 12px",
+                                                fontFamily: "Segoe UI Symbol",
+                                                fontWeight: "medium",
                                             }}
                                         >
                                             Next
