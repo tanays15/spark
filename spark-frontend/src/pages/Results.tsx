@@ -48,22 +48,45 @@ const Results: React.FC = () => {
 
     // Use mock data to simulate API response
     useEffect(() => {
-        // Mocking data for the demonstration
-        setTimeout(() => {
-            setData({
-                contentScore: 85,
-                visualScore: 92,
-                audioScore: 88,
-                score: 90,
-                feedback: "Great presentation! Your speech was clear, and your vision was spot on. Keep it up!",
-                resources: [
-                    { title: "Effective Public Speaking", url: "https://www.example.com/speech" },
-                    { title: "Improving Your Vision", url: "https://www.example.com/vision" }
-                ]
-            });
-            setLoading(false);
-        }, 1000); // Simulating loading time
-    }, []);
+        const fetchData = async () => {
+            try {
+                // Make the API call to fetch record by ID
+                const response = await fetch(`http://localhost:5000/api/records?id=${id}`);
+                
+                if (!response.ok) {
+                    throw new Error('Error fetching data');
+                }
+
+                // Parse the response JSON
+                const result = await response.json();
+
+                // Check if the response contains error
+                if (result.error) {
+                    console.error(result.error);
+                    setLoading(false);
+                    return;
+                }
+
+                // Set the data from the API response
+                setData(result); // Assuming the API returns the expected structure
+                setLoading(false);
+            } catch (error) {
+                console.error('Error:', error);
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []); 
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    // If there's no data
+    if (!data) {
+        return <div>No data available</div>;
+    }
 
     return (
         <>
@@ -174,19 +197,19 @@ const Results: React.FC = () => {
 
                             {/* Resource Links Section */}
                             <Box sx={{ marginTop: 5, padding: 3, backgroundColor: "#fff", borderRadius: "12px", boxShadow: 3 }}>
-                                <Typography variant="h5" fontWeight="bold" gutterBottom>
-                                    Suggested Resources
-                                </Typography>
-                                {data.resources.map((resource, index) => (
-                                    <Typography key={index}>
-                                        <Link href={resource.url} target="_blank" rel="noopener noreferrer"
-                                              sx={{ color: "#1976d2", textDecoration: "none", "&:hover": { textDecoration: "underline" } }}
-                                        >
-                                            {resource.title}
-                                        </Link>
-                                    </Typography>
-                                ))}
-                            </Box>
+                <Typography variant="h5" fontWeight="bold" gutterBottom>
+        Suggested Resources
+    </Typography>
+    {data.resources.split(' ').map((resource, index) => (
+        <Typography key={index}>
+            <Link href={resource} target="_blank" rel="noopener noreferrer"
+                  sx={{ color: "#1976d2", textDecoration: "none", "&:hover": { textDecoration: "underline" } }}
+            >
+                {resource}
+            </Link>
+        </Typography>
+    ))}
+</Box>
                         </>
                     )}
                 </Container>

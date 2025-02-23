@@ -33,6 +33,15 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 record_bp = Blueprint("record_bp", __name__)
 # comment
 
+@record_bp.route("/api/records", methods=["GET"])
+def get_record():
+    record_id = request.args.get('id')
+    if not record_id:
+        return jsonify({"error": "Invalid record"}), 400
+    record = Record.query.filter_by(id = record_id).first()
+    if not record:
+        return jsonify({"error": "Record does not exist"}), 400
+    return jsonify(record.to_dict()), 200
 
 @record_bp.route("/records", methods=["POST", "GET"])
 def manage_records():

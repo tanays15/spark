@@ -3,6 +3,7 @@ import { Box, Button, Typography, FormControl, InputLabel, Select, MenuItem } fr
 import { ReactMediaRecorder } from 'react-media-recorder';
 import { useAuth0 } from '@auth0/auth0-react';
 import Navbar from '../components/Navbar';
+import { useNavigate } from 'react-router-dom';
 
 const Recording = () => {
   const { user, isAuthenticated, loginWithRedirect } = useAuth0();
@@ -12,6 +13,7 @@ const Recording = () => {
   const [selectedTopic, setSelectedTopic] = useState('');
   const [dropdownTopics, setDropdownTopics] = useState<string[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const navigate = useNavigate();
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
@@ -66,6 +68,9 @@ const Recording = () => {
       });
 
       if (response.ok) {
+        const data = await response.json()
+        console.log(data);
+        navigate(`/results/${data.id}`); // Navigate to Recording.tsx
         console.log('Video sent for analysis');
       } else {
         console.error('Video analysis request failed');
