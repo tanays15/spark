@@ -9,7 +9,13 @@ const slides = [
     },
     {
         title: "How SPARK Works",
-        content: "SPARK uses facial recognition, speech pattern analysis, and real-time transcription to evaluate confidence. Our advanced algorithms process each element to generate a feedback score that is accurate and actionable. This helps individuals adjust their delivery and gain insights into their communication style."
+        content: "SPARK utilizes advanced AI models to assess communication effectiveness by analyzing " +
+            " various speech and behavioral factors. We collect audio data such as voice pitch, tone, and pauses, as" +
+            " well as facial expressions and behavioral signals like hand fidgeting, to evaluate a speaker’s" +
+            " confidence level. Speech is transcribed using Whisper API, and its correctness is assessed with GPT" +
+            " API. Our technology stack includes Librosa for detailed audio analysis (e.g., pitch, rate of speech," +
+            " stuttering)," + " Whisper API for converting speech to text, and OpenCV for tracking facial expressions and behavioral" +
+            " cues. These data points are processed in real-time, using machine learning models to evaluate both the delivery (e.g., tone, emotional cues) and accuracy of speech content. SPARK offers feedback on both confidence and correctness, while tracking user progress over time."
     },
     {
         title: "Track Your Progress",
