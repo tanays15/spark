@@ -39,20 +39,24 @@ def manage_records():
     if request.method == "GET":
         username = request.args.get('username')
         topic = request.args.get('topic')
+        print(username)
+        print(topic)
         if not username and not topic:
             return jsonify({"error": "Invalid username or topic"}), 400
-        user = User.query.filter_by(username=username).first()
+        user = User.query.filter_by(auth0_id=username).first()
         topic = Topic.query.filter_by(name=topic).first()
+        print(user)
+        print(topic.id)
         if not user:
-            return jsonify({"error": "User or Topic does not exist"})
+            return jsonify({"error": "User or Topic does not exist"}), 400
         records = Record.query.filter_by(
             user_id=user.id, topic_id=topic.id).all()
         return jsonify([record.to_dict() for record in records]), 200
     elif request.method == "POST":
 
-        username = request.form.get("user")
+        username = request.form.get("userId")
         topicName = request.form.get("topic")
-        file = request.files.get("file")
+        file = request.files.get("video")
         # contentScore = data.get("contentScore")
         # confidenceScore = data.get("confidenceScore")
         # totalScore = (contentScore + confidenceScore) // 2
@@ -62,14 +66,14 @@ def manage_records():
         topic = Topic.query.filter_by(name=topicName).first()
 
         if not user:
-            return jsonify({"error": "User or Topic does not exist"}), 400
-        
+            return jsonify({"error": "User does not exist"}), 400
+
         if not topic:
             topic = Topic(name=topicName, user_id=user.id)
             db.session.add(topic)
             db.session.commit()
             topic = Topic.query.filter_by(name=topicName).first()
-        
+
         if file:
             # Create output directory if not exists
             save_dir = "saved_files"
@@ -88,7 +92,8 @@ def manage_records():
 
             # Convert to MP4 (If re-encoding is needed)
             ff.input(input_path).output(output_video_path, format="mp4").run()
-            content_score, feedback, resources = extract_score_and_feedback(output_audio_path)
+            content_score, feedback, resources = extract_score_and_feedback(
+                output_audio_path)
             audio_score = test_audio_analysis(output_audio_path)
 
             visual_score = final_rating(output_video_path)
@@ -98,7 +103,8 @@ def manage_records():
             os.remove(output_audio_path)
             os.remove(output_video_path)
 
-            record = Record(user_id=user.id, topic_id=topic.id, contentScore=content_score, visualScore=visual_score, audioScore=audio_score, score=score, feedback=feedback, resources=resources)
+            record = Record(user_id=user.id, topic_id=topic.id, contentScore=content_score, visualScore=visual_score,
+                            audioScore=audio_score, score=score, feedback=feedback, resources=resources)
             db.session.add(record)
             db.session.commit()
 
@@ -110,7 +116,7 @@ def manage_records():
 def analyze_audio(audio_stream):
     # ensure that we are at the start of the file - error checking
     audio_stream.seek(0)
-    
+
     # time_series = actual audio in the form of time series
     # sample_rate = the sample rate, in this case it's just the native sample rate of the audio file
     time_series, sample_rate = librosa.load(audio_stream, sr=None)
@@ -118,10 +124,10 @@ def analyze_audio(audio_stream):
     # analyzing the pitches (unusually high pitches)
     pitches, magnitudes = librosa.core.piptrack(y=time_series, sr=sample_rate)
     avg_pitch = np.sum(pitches * magnitudes) / np.sum(magnitudes)
-    variance = extract_pitch_variance(time_series, sample_rate, pitches, magnitudes)
+    variance = extract_pitch_variance(
+        time_series, sample_rate, pitches, magnitudes)
     # right now this is the mean short_term variation, but we can change this to look within each time frame
     short_variation_mean = analyze_short_term(time_series, sample_rate)
-
 
     # speech rate analysis (called zero-crossing rate -- pauses)
     zero_crossings = librosa.feature.zero_crossing_rate(time_series)
@@ -129,7 +135,6 @@ def analyze_audio(audio_stream):
     stutters = zero_crossings.std()
 
     return avg_pitch, variance, short_variation_mean, speech_rate, stutters
-
 
 
 def extract_pitch_variance(time_series, sample_rate, pitches, magnitudes):
@@ -141,25 +146,28 @@ def extract_pitch_variance(time_series, sample_rate, pitches, magnitudes):
 
         # Avoid dividing by zero
         if np.sum(magnitude_time) > 0:
-            avg_pitch = np.sum(pitch_time * magnitude_time) / np.sum(magnitude_time)
+            avg_pitch = np.sum(pitch_time * magnitude_time) / \
+                np.sum(magnitude_time)
             pitch_vals.append(avg_pitch)  # This will work now
-    
+
     # Convert to numpy array AFTER appending
     pitch_vals = np.array(pitch_vals)
 
     # Calculate variance
-    return np.var(pitch_vals) if len(pitch_vals) > 0 else 0  # Avoid errors if empty
+    # Avoid errors if empty
+    return np.var(pitch_vals) if len(pitch_vals) > 0 else 0
 
-    
+
 def analyze_short_term(time_series, sample_rate, frame=2048, hop=512, window=5):
     # Here, we are analyzing the short_term pitch variation in the audio file
 
     # f0 = fundamental frequency for each time frame of audio
     # bool_voices = matches with the NaN in f0
-    f0, bool_voice, _ = librosa.pyin(time_series, fmin=75, fmax=300, sr=sample_rate, frame_length=frame, hop_length=hop)
+    f0, bool_voice, _ = librosa.pyin(
+        time_series, fmin=75, fmax=300, sr=sample_rate, frame_length=frame, hop_length=hop)
     f0 = np.nan_to_num(f0)
 
-    var_arr = [np.std(f0[max(0, i - window):i+1]) for i in range (len(f0))]
+    var_arr = [np.std(f0[max(0, i - window):i+1]) for i in range(len(f0))]
     mean_var = np.mean(var_arr)
 
     return mean_var
@@ -171,7 +179,8 @@ def test_audio_analysis(file_path):
         audio_stream = io.BytesIO(f.read())  # Convert to byte stream
 
     # Call the function to analyze the audio
-    avg_pitch, variance, short_variation_mean, speech_rate, stutters = analyze_audio(audio_stream)
+    avg_pitch, variance, short_variation_mean, speech_rate, stutters = analyze_audio(
+        audio_stream)
 
     # Debugging: Print extracted values
     # print("Average Pitch:", avg_pitch)
@@ -179,9 +188,11 @@ def test_audio_analysis(file_path):
     # print("Short-Term Variation Mean:", short_variation_mean)
     # print("Speech Rate (Zero Crossings):", speech_rate)
     # print("Stutters (Standard Deviation of Zero Crossings):", stutters)
-    score = calculate_confidence_score(avg_pitch=avg_pitch, pitch_variance=variance, short_variation_mean=short_variation_mean, speech_rate=speech_rate, stutters=stutters)
+    score = calculate_confidence_score(avg_pitch=avg_pitch, pitch_variance=variance,
+                                       short_variation_mean=short_variation_mean, speech_rate=speech_rate, stutters=stutters)
     return score
     # print("Final Score: ", score)
+
 
 def calculate_confidence_score(avg_pitch, pitch_variance, short_variation_mean, speech_rate, stutters):
     # Define thresholds and weights
@@ -219,7 +230,8 @@ def calculate_confidence_score(avg_pitch, pitch_variance, short_variation_mean, 
 
     # Penalize based on speech rate
     if speech_rate < speech_rate_threshold_low or speech_rate > speech_rate_threshold_high:
-        penalty = abs(speech_rate - (speech_rate_threshold_low + speech_rate_threshold_high) / 2) * 100
+        penalty = abs(speech_rate - (speech_rate_threshold_low +
+                      speech_rate_threshold_high) / 2) * 100
         score -= penalty * speech_rate_weight
 
     # Penalize based on stutter rate
@@ -242,63 +254,68 @@ def calculate_confidence_score(avg_pitch, pitch_variance, short_variation_mean, 
         return score
     return (score - 90) * 10
 
+
 load_dotenv()
+
 
 def extract_score_and_feedback(file_path):
     try:
-      model = whisper.load_model('base')
-      result = model.transcribe(file_path,fp16=False)
-      text = result['text']
-      client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-      completion = client.chat.completions.create(
-      model="gpt-4o",
-      messages=[
-        {"role": "system", "content": "You are an expert evaluator grading a speech based on accuracy and completeness in explaining the given topic. The speech is from a human talking naturally, so it may contain fillers, alternate wording like “finer research” or “unarray,” minor mispronunciations, or speech-to-text errors. These minor or incorrect terms should be completely ignored and should not appear in your final feedback. Focus solely on whether the explanation conveys the core concept accurately. Do not penalize for grammar, minor wording inconsistencies, or natural speech patterns. Also, do not comment on or mention any sorting requirements. Your task is to analyze the content strictly for factual correctness related to the essence of the topic and for completeness in covering its essential points. If there are any factual errors or misconceptions directly affecting the understanding of the topic itself, you may address them; otherwise, disregard any minor speech anomalies or imprecise terms.Use the following scoring scale: 90-100 (Exceptional): The explanation is highly accurate, well-structured, and covers all key aspects of the topic with correct definitions, logic, and necessary details, with no major factual errors or missing components. 75-89 (Strong): The explanation is mostly correct and covers the important details but may lack depth in some areas or contain minor factual inaccuracies that do not significantly impact understanding. 60-74 (Adequate): The explanation is generally correct but some key points are missing, vague, or incomplete, with noticeable factual errors that affect clarity and requiring more precise definitions or examples. 40-59 (Weak): The explanation has multiple inaccuracies or misconceptions, with key elements missing, and may be overly broad, confusing, or misleading, requiring significant improvement in accuracy and depth. 1-39 (Poor): The explanation is mostly incorrect or fails to convey key ideas, containing major factual errors, misconceptions, or irrelevant or misleading information. Do not grade too harshly, and avoid being overly critical with the score. Provide constructive feedback that highlights strengths and areas for improvement while keeping the score fair. Focus only on the correctness and completeness of the explanation. Do not deduct points for any minor wording issues, mispronunciations, or irrelevant speech-to-text artifacts.Your final output must follow this format exactly, with a new line after each label, and without referencing any ignored issues:Score: X/100 Feedback: Brief paragraph highlighting strengths and areas for improvement, strictly focusing on the core topic without mentioning minor speech errors or the sorting requirement. Suggested Resources: link1 link2 link3 ...and so on, up to 10 relevant links or articles without bullet points.Only provide resources directly related to the topic and do not exceed 10 total links."},
-        {"role": "user", "content": text}
-      ]
-    )
-      
-      text = completion.choices[0].message.content
+        model = whisper.load_model('base')
+        result = model.transcribe(file_path, fp16=False)
+        text = result['text']
+        client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+        completion = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system",
+                    "content": "You are an expert evaluator grading a speech based on accuracy and completeness in explaining the given topic. The speech is from a human talking naturally, so it may contain fillers, alternate wording like “finer research” or “unarray,” minor mispronunciations, or speech-to-text errors. These minor or incorrect terms should be completely ignored and should not appear in your final feedback. Focus solely on whether the explanation conveys the core concept accurately. Do not penalize for grammar, minor wording inconsistencies, or natural speech patterns. Also, do not comment on or mention any sorting requirements. Your task is to analyze the content strictly for factual correctness related to the essence of the topic and for completeness in covering its essential points. If there are any factual errors or misconceptions directly affecting the understanding of the topic itself, you may address them; otherwise, disregard any minor speech anomalies or imprecise terms.Use the following scoring scale: 90-100 (Exceptional): The explanation is highly accurate, well-structured, and covers all key aspects of the topic with correct definitions, logic, and necessary details, with no major factual errors or missing components. 75-89 (Strong): The explanation is mostly correct and covers the important details but may lack depth in some areas or contain minor factual inaccuracies that do not significantly impact understanding. 60-74 (Adequate): The explanation is generally correct but some key points are missing, vague, or incomplete, with noticeable factual errors that affect clarity and requiring more precise definitions or examples. 40-59 (Weak): The explanation has multiple inaccuracies or misconceptions, with key elements missing, and may be overly broad, confusing, or misleading, requiring significant improvement in accuracy and depth. 1-39 (Poor): The explanation is mostly incorrect or fails to convey key ideas, containing major factual errors, misconceptions, or irrelevant or misleading information. Do not grade too harshly, and avoid being overly critical with the score. Provide constructive feedback that highlights strengths and areas for improvement while keeping the score fair. Focus only on the correctness and completeness of the explanation. Do not deduct points for any minor wording issues, mispronunciations, or irrelevant speech-to-text artifacts.Your final output must follow this format exactly, with a new line after each label, and without referencing any ignored issues:Score: X/100 Feedback: Brief paragraph highlighting strengths and areas for improvement, strictly focusing on the core topic without mentioning minor speech errors or the sorting requirement. Suggested Resources: link1 link2 link3 ...and so on, up to 10 relevant links or articles without bullet points.Only provide resources directly related to the topic and do not exceed 10 total links."},
+                {"role": "user", "content": text}
+            ]
+        )
 
-      print(text)
-    
-      score_match = re.search(r'Score:\s*(\d+)/100', text)
-      score = int(score_match.group(1)) if score_match else None
+        text = completion.choices[0].message.content
 
-      feedback_match = re.search(r'Feedback:\s*(.*?)Suggested Resources:', text, re.DOTALL)
-      feedback = (feedback_match.group(1)) if feedback_match else None
-      print(feedback)
+        print(text)
 
+        score_match = re.search(r'Score:\s*(\d+)/100', text)
+        score = int(score_match.group(1)) if score_match else None
 
-      
-      resouces_match = re.search(r'Suggested Resources:\s*(.*)', text, re.DOTALL)
-      resouces = resouces_match.group(1).strip() if resouces_match else None
-      return score, feedback, resouces
-    
+        feedback_match = re.search(
+            r'Feedback:\s*(.*?)Suggested Resources:', text, re.DOTALL)
+        feedback = (feedback_match.group(1)) if feedback_match else None
+        print(feedback)
+
+        resouces_match = re.search(
+            r'Suggested Resources:\s*(.*)', text, re.DOTALL)
+        resouces = resouces_match.group(1).strip() if resouces_match else None
+        return score, feedback, resouces
+
     except Exception as e:
         return json.dumps({"error": str(e)}, indent=4)
-    
+
+
 def final_rating(filename):
-        
-        frames = []
-        video = cv2.VideoCapture(filename)
 
-        while True:
-            read, frame= video.read()
-            if not read:
-                break
-            frames.append(frame)
-        
-        gaze_score = gaze_rating(frames)
-        
-        emotion_score = emotion_rating(frames)
+    frames = []
+    video = cv2.VideoCapture(filename)
 
-        motion_score = motion_rating(frames)
+    while True:
+        read, frame = video.read()
+        if not read:
+            break
+        frames.append(frame)
 
-        if (motion_score == 0):
-            return gaze_score * .7 + emotion_score * .3
-        return gaze_score * .6 + motion_score * .2 + emotion_score * .2
-     
+    gaze_score = gaze_rating(frames)
+
+    emotion_score = emotion_rating(frames)
+
+    motion_score = motion_rating(frames)
+
+    if (motion_score == 0):
+        return gaze_score * .7 + emotion_score * .3
+    return gaze_score * .6 + motion_score * .2 + emotion_score * .2
+
+
 def gaze_rating(frames):
     gaze_dir = []
 
@@ -309,52 +326,50 @@ def gaze_rating(frames):
     with mp_face_mesh.FaceMesh(min_detection_confidence=0.5, min_tracking_confidence=0.5) as face_mesh:
         for i, frame in enumerate(frames):
 
-                if (i % 20 == 0):
+            if (i % 20 == 0):
 
-                    if frame is None:
-                        print("Error: Encountered an empty frame.")
-                        continue  # Skip this frame to avoid errors
+                if frame is None:
+                    print("Error: Encountered an empty frame.")
+                    continue  # Skip this frame to avoid errors
 
-                    # Convert to RGB for MediaPipe
-                    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                # Convert to RGB for MediaPipe
+                rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-                    # Process the frame to detect landmarks
-                    results = face_mesh.process(rgb_frame)
+                # Process the frame to detect landmarks
+                results = face_mesh.process(rgb_frame)
 
-                    # If landmarks are detected
-                    if results.multi_face_landmarks:
-                        for landmarks in results.multi_face_landmarks:
+                # If landmarks are detected
+                if results.multi_face_landmarks:
+                    for landmarks in results.multi_face_landmarks:
 
-                            mp_drawing.draw_landmarks(frame, landmarks, mp_face_mesh.FACEMESH_CONTOURS)
+                        mp_drawing.draw_landmarks(
+                            frame, landmarks, mp_face_mesh.FACEMESH_CONTOURS)
 
+                        # Get the positions of the eyes (specific points from the face mesh landmarks)
+                        left_eye = landmarks.landmark[33]  # Left eye center
+                        right_eye = landmarks.landmark[263]  # Right eye center
 
-                            # Get the positions of the eyes (specific points from the face mesh landmarks)
-                            left_eye = landmarks.landmark[33]  # Left eye center
-                            right_eye = landmarks.landmark[263]  # Right eye center
+                        # Calculate the gaze direction based on the relative position of the eyes
+                        eye_center_x = (left_eye.x + right_eye.x) / 2
+                        eye_center_y = (left_eye.y + right_eye.y) / 2
 
-                            # Calculate the gaze direction based on the relative position of the eyes
-                            eye_center_x = (left_eye.x + right_eye.x) / 2
-                            eye_center_y = (left_eye.y + right_eye.y) / 2
+                        # Normalize gaze direction to the center of the screen
+                        gaze_direction = (int((eye_center_x - 0.5) * frame.shape[1] * 2),
+                                          int((eye_center_y - 0.5) * frame.shape[0] * 2))
 
-                            # Normalize gaze direction to the center of the screen
-                            gaze_direction = (int((eye_center_x - 0.5) * frame.shape[1] * 2), 
-                                            int((eye_center_y - 0.5) * frame.shape[0] * 2))
-                            
-                            gaze_dir.append(gaze_direction)
+                        gaze_dir.append(gaze_direction)
 
-                    # Press 'q' to exit
-                    if cv2.waitKey(1) & 0xFF == ord('q'):
-                        break
-
+                # Press 'q' to exit
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
 
     transposed = zip(*gaze_dir)
     means = [statistics.mean(col) for col in transposed]
     sum_of = 0
 
-
-
     for gaze in gaze_dir:
-        sum_of += math.pow((gaze[0] - means[0]), 2) + math.pow((gaze[1] - means[1]), 2)
+        sum_of += math.pow((gaze[0] - means[0]), 2) + \
+            math.pow((gaze[1] - means[1]), 2)
 
     if len(gaze_dir) == 0:
         return 0
@@ -367,64 +382,74 @@ def gaze_rating(frames):
     eye_gaze_grade = min(eye_gaze_grade, 97.234875629837456)
 
     return eye_gaze_grade
-     
+
+
 def emotion_rating(frames):
-        score = 0
-        for i, frame in enumerate(frames):
-            if (i % 20 == 0):
-                result = DeepFace.analyze(frame, actions = ['emotion'], enforce_detection=False)
-                emotions = []
-                emotions.append(result[0]['emotion']['angry'] * .75)
-                emotions.append(result[0]['emotion']['disgust'] * .6)
-                emotions.append(result[0]['emotion']['fear'] * .5)
-                emotions.append(result[0]['emotion']['happy'] * .9)
-                emotions.append(result[0]['emotion']['sad'] * .9)
-                emotions.append(result[0]['emotion']['surprise'] * .65)
-                emotions.append(result[0]['emotion']['neutral'] * 1.2)
-                score += sum(emotions)
+    score = 0
+    for i, frame in enumerate(frames):
+        if (i % 20 == 0):
+            result = DeepFace.analyze(
+                frame, actions=['emotion'], enforce_detection=False)
+            emotions = []
+            emotions.append(result[0]['emotion']['angry'] * .75)
+            emotions.append(result[0]['emotion']['disgust'] * .6)
+            emotions.append(result[0]['emotion']['fear'] * .5)
+            emotions.append(result[0]['emotion']['happy'] * .9)
+            emotions.append(result[0]['emotion']['sad'] * .9)
+            emotions.append(result[0]['emotion']['surprise'] * .65)
+            emotions.append(result[0]['emotion']['neutral'] * 1.2)
+            score += sum(emotions)
 
-        if (len(frames) == 0):
-            return 0
-        return min(score/(len(frames) / 20), 92.587345638)
-     
+    if (len(frames) == 0):
+        return 0
+    return min(score/(len(frames) / 20), 92.587345638)
+
+
 def motion_rating(frames):
-        
-        mp_hands = mp.solutions.hands
-        hands = mp_hands.Hands(static_image_mode=False, max_num_hands=2, min_detection_confidence=0.5)
-        database = []
 
-        for j, frame in enumerate(frames):
-            if (j % 20 == 0):
-                frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                results = hands.process(frame_rgb)
+    mp_hands = mp.solutions.hands
+    hands = mp_hands.Hands(static_image_mode=False,
+                           max_num_hands=2, min_detection_confidence=0.5)
+    database = []
 
+    for j, frame in enumerate(frames):
+        if (j % 20 == 0):
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            results = hands.process(frame_rgb)
 
-                if results.multi_hand_landmarks:
-                    frame_data = [None, None]  # Ensure 2 hands per frame (Right, Left)
+            if results.multi_hand_landmarks:
+                # Ensure 2 hands per frame (Right, Left)
+                frame_data = [None, None]
 
-                    for i, hand_landmarks in enumerate(results.multi_hand_landmarks):
+                for i, hand_landmarks in enumerate(results.multi_hand_landmarks):
                     # Extract keypoints (21 per hand)
-                        if i < 2:
-                            hand_points = [(lm.x, lm.y, lm.z) for lm in hand_landmarks.landmark]
-                            frame_data[i] = hand_points  # Assign to correct hand slot
+                    if i < 2:
+                        hand_points = [(lm.x, lm.y, lm.z)
+                                       for lm in hand_landmarks.landmark]
+                        # Assign to correct hand slot
+                        frame_data[i] = hand_points
 
-                    database.append(frame_data)  # Append the fixed-length frame data
-        database_np = np.array([[h if h is not None else np.zeros((21, 3)) for h in frame] for frame in database])
+                # Append the fixed-length frame data
+                database.append(frame_data)
+    database_np = np.array([[h if h is not None else np.zeros(
+        (21, 3)) for h in frame] for frame in database])
 
-        averages = np.mean(database_np, axis=0)
+    averages = np.mean(database_np, axis=0)
 
-        total_distance = 0
+    total_distance = 0
 
-        for frame in database_np:
-            for hand_idx, hand in enumerate(frame):  # Iterate through 2 hands (0 for left, 1 for right)
-                # Get the average hand keypoints
-                average_hand = averages[hand_idx]
+    for frame in database_np:
+        # Iterate through 2 hands (0 for left, 1 for right)
+        for hand_idx, hand in enumerate(frame):
+            # Get the average hand keypoints
+            average_hand = averages[hand_idx]
 
-                # Calculate the Euclidean distance for each keypoint (x, y, z)
-                for i, keypoint in enumerate(hand):  # 21 keypoints per hand
-                    distance = np.linalg.norm(np.array(keypoint) - np.array(average_hand[i]))
-                    total_distance += distance  # Sum the distances
-        if (len(database) < 10):
-            return 0
-        motion_score = 100 - (total_distance/len(database))
-        return min(motion_score, 97.234234)
+            # Calculate the Euclidean distance for each keypoint (x, y, z)
+            for i, keypoint in enumerate(hand):  # 21 keypoints per hand
+                distance = np.linalg.norm(
+                    np.array(keypoint) - np.array(average_hand[i]))
+                total_distance += distance  # Sum the distances
+    if (len(database) < 10):
+        return 0
+    motion_score = 100 - (total_distance/len(database))
+    return min(motion_score, 97.234234)
