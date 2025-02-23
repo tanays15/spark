@@ -1,293 +1,142 @@
-import React, { Component } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ReactMediaRecorder } from 'react-media-recorder';
-import { Box } from "@mui/system";
+import { Box, Typography } from '@mui/material';
+import { useAuth0 } from '@auth0/auth0-react';
 import Navbar from '../components/Navbar';
-import { Typography } from "@mui/material";
 import { Link } from 'react-router-dom';
 
-interface VideoRecorderState {
-    isRecording: boolean;
-    videoUrl: string | null;
-    mediaStream: MediaStream | null;
-    selectedFile: File | null;
-    selectedTopic: string;
-    dropdownTopics: string[];
-    isDropdownActive: boolean;
-    countdown: number | null;
-}
+const VideoRecorder = () => {
+    const [isRecording, setIsRecording] = useState(false);
+    const [videoUrl, setVideoUrl] = useState(null);
+    const [mediaStream, setMediaStream] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [selectedTopic, setSelectedTopic] = useState('');
+    const [countdown, setCountdown] = useState(null);
+    const videoRef = useRef(null);
+    const { user } = useAuth0();
 
-class VideoRecorder extends Component<{}, VideoRecorderState> {
-    state: VideoRecorderState = {
-        isRecording: false,
-        videoUrl: null,
-        mediaStream: null,
-        selectedFile: null,
-        selectedTopic: '',
-        dropdownTopics: [],
-        isDropdownActive: false,
-        countdown: null,
-    };
-
-    videoRef: React.RefObject<HTMLVideoElement> = React.createRef();
-
-    startCountdown = (startRecording: () => void) => {
-        this.setState({ countdown: 3 }, () => {
-            const countdownInterval = setInterval(() => {
-                this.setState((prevState) => {
-                    if (prevState.countdown === 1) {
-                        clearInterval(countdownInterval);
-                        this.setState({ countdown: null });
-                        startRecording();
-                    }
-                    return { countdown: prevState.countdown! - 1 };
-                });
-            }, 1000);
-        });
-    };
-
-    async componentDidMount() {
-        try {
-            const response = await fetch('http://127.0.0.1:5000/topics', {
-                method: 'GET'
+    const startCountdown = (startRecording) => {
+        setCountdown(3);
+        const interval = setInterval(() => {
+            setCountdown((prev) => {
+                if (prev === 1) {
+                    clearInterval(interval);
+                    setCountdown(null);
+                    startRecording();
+                }
+                return prev - 1;
             });
-            const data = await response.json();
-            if (response.ok) {
-                this.setState({ dropdownTopics: data.topics });
-            } else {
-                console.error('Failed to fetch topics');
-            }
-        } catch (error) {
-            console.error('Error fetching topics:', error);
-        }
-    }
+        }, 1000);
+    };
 
-    sendVideoToBackend = async (videoBlob: Blob) => {
-        const { selectedTopic } = this.state;
-
+    const sendVideoToBackend = async (videoBlob, user) => {
         try {
             const formData = new FormData();
             formData.append('file', videoBlob, 'video-file.webm');
+            formData.append('user', user?.sub || 'unknown');
             formData.append('topic', selectedTopic);
 
-            const response = await fetch('http://127.0.0.1:5000/records', {
+            const response = await fetch('http://localhost:5000/records', {
                 method: 'POST',
                 body: formData,
             });
-
             const result = await response.json();
-            if (response.ok) {
-                console.log('Video uploaded successfully:', result);
-            } else {
-                console.error('Error uploading video:', result);
-            }
+            if (!response.ok) console.error('Error uploading video:', result);
         } catch (error) {
-            console.error('Error uploading video to the server:', error);
+            console.error('Error uploading video:', error);
         }
     };
 
-    handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileUpload = async (event) => {
         const file = event.target.files?.[0];
-        if (file) {
-            this.setState({ selectedFile: file, videoUrl: URL.createObjectURL(file) });
+        if (file) setSelectedFile(file);
+    };
+
+    const handleSendUploadedFile = async () => {
+        if (selectedFile) {
+            const videoBlob = new Blob([await selectedFile.arrayBuffer()], { type: selectedFile.type });
+
+            sendVideoToBackend(videoBlob, user);
         }
     };
 
-    handleSendUploadedFile = async () => {
-        if (this.state.selectedFile) {
-            const videoBlob = new Blob([await this.state.selectedFile.arrayBuffer()], { type: this.state.selectedFile.type });
-            this.sendVideoToBackend(videoBlob);
-        }
-    };
+    return (
+        <div style={{ textAlign: 'center', padding: '20px', backgroundColor: '#1b2034', minHeight: '100vh' }}>
+            <Navbar />
+            <Box display="flex" flexDirection="column" alignItems="center" sx={{ marginTop: '40px' }}>
+                <Typography variant="h2" sx={{ color: 'white' }}>Record a Video</Typography>
+                {countdown !== null && <Typography variant="h1" sx={{ color: 'white' }}>{countdown}</Typography>}
 
-    render() {
-        const { isRecording, videoUrl, selectedFile, mediaStream, countdown } = this.state;
-
-        return (
-            <div
-                style={{
-                    textAlign: 'center',
-                    padding: '20px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backgroundColor: "#1b2034",
-                    minHeight: "100vh",
-                }}
-            >
-                <Navbar style={{ marginBottom: '20px' }} />
-                <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" sx={{ height: 'calc(100vh - 75px)', width: '100vw', fontFamily: "Helvetica Neue", overflow: 'auto', marginTop: '40px'}}>
-
-                    <Typography variant="h2" sx={{ color: "white", fontWeight: "medium", fontFamily: "Helvetica Neue", textAlign: "center" }}>
-                        Record a Video
-                    </Typography>
-
-                    {/* Countdown Timer */}
-                    {countdown !== null && (
-                        <div style={{
-                            position: 'fixed',
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)',
-                            fontSize: '100px',
-                            color: 'white',
-                            zIndex: 1000,
-                        }}>
-                            {countdown}
+                <ReactMediaRecorder
+                    video
+                    videoConstraints={{ mimeType: 'video/webm' }}
+                    onStart={async () => {
+                        setIsRecording(true);
+                        try {
+                            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                            setMediaStream(stream);
+                            if (videoRef.current) {
+                                videoRef.current.srcObject = stream;
+                                videoRef.current.play();
+                            }
+                        } catch (error) {
+                            console.error('Error accessing media devices:', error);
+                        }
+                    }}
+                    onStop={async (blobUrl) => {
+                        setIsRecording(false);
+                        setVideoUrl(blobUrl);
+                        if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+                    }}
+                    render={({ startRecording, stopRecording }) => (
+                        <div>
+                            {!isRecording && !videoUrl && (
+                                <button onClick={() => startCountdown(startRecording)}>Start Recording</button>
+                            )}
+                            {isRecording && <button onClick={stopRecording}>Stop Recording</button>}
                         </div>
                     )}
+                />
 
-                    {/* Camera Feed */}
-                    {isRecording && mediaStream && (
-                        <video
-                            ref={this.videoRef}
-                            autoPlay
-                            muted
-                            style={{
-                                width: '80%',
-                                maxWidth: '500px',
-                                backgroundColor: 'black',
-                                borderRadius: '8px',
-                                marginTop: '20px'
-                            }}
-                        />
-                    )}
-
-                    {/* Video Recorder */}
-                    <ReactMediaRecorder
-                        video
-                        videoConstraints={{ mimeType: 'video/webm' }}
-                        onStart={async () => {
-                            this.setState({ isRecording: true });
-
-                            try {
-                                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                                this.setState({ mediaStream: stream }, () => {
-                                    if (this.videoRef.current) {
-                                        this.videoRef.current.srcObject = stream;
-                                        this.videoRef.current.play().catch(error => console.error("Video play error:", error));
+                {videoUrl && (
+                    <div>
+                        <Typography variant="h5" sx={{ color: 'white' }}>Preview</Typography>
+                        <video controls src={videoUrl} style={{ width: '80%', maxWidth: '500px' }} />
+                        <div>
+                            <button onClick={() => setVideoUrl(null)}>Record Again</button>
+                            <Link to="/results">
+                                <button onClick={async () => {
+                                    if (!selectedFile) {
+                                        const response = await fetch(videoUrl);
+                                        const videoBlob = await response.blob();
+                                        sendVideoToBackend(videoBlob, user);
+                                    } else {
+                                        handleSendUploadedFile();
                                     }
-                                });
-                            } catch (error) {
-                                console.error("Error accessing media devices:", error);
-                            }
-                        }}
-                        onStop={async (blobUrl: string) => {
-                            this.setState({ isRecording: false, videoUrl: blobUrl });
-
-                            if (this.state.mediaStream) {
-                                this.state.mediaStream.getTracks().forEach(track => track.stop());
-                            }
-                        }}
-                        render={({ startRecording, stopRecording }) => (
-                            <div style={{ marginTop: "20px" }}>
-                                {!isRecording && !videoUrl && (
-                                    <button
-                                        onClick={() => this.startCountdown(startRecording)}
-                                        style={{
-                                            padding: '10px 20px',
-                                            fontSize: '16px',
-                                            backgroundColor: '#3874cb',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '5px',
-                                            cursor: 'pointer',
-                                        }}
-                                    >
-                                        Start Recording
-                                    </button>
-                                )}
-
-                                {isRecording && (
-                                    <button
-                                        onClick={stopRecording}
-                                        style={{
-                                            padding: '10px 20px',
-                                            fontSize: '16px',
-                                            backgroundColor: '#370173',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '5px',
-                                            cursor: 'pointer',
-                                        }}
-                                    >
-                                        Stop Recording
-                                    </button>
-                                )}
-                            </div>
-                        )}
-                    />
-
-                    {/* Video Preview */}
-                    {videoUrl && (
-                        <div style={{ marginTop: '20px', textAlign: 'center' }}>
-                            <h3 style={{ color: 'white' }}>Preview</h3>
-                            <video controls src={videoUrl} style={{ width: '80%', maxWidth: '500px' }} />
-
-                            <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
-                                <button
-                                    onClick={() => this.setState({ videoUrl: null, isRecording: false, mediaStream: null, selectedFile: null })}
-                                    style={{
-                                        padding: '10px 20px',
-                                        fontSize: '16px',
-                                        backgroundColor: '#3874cb',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '5px',
-                                        cursor: 'pointer',
-                                    }}
-                                >
-                                    {this.state.selectedFile ? 'Upload Another File' : 'Record Again'}
-                                </button>
-
-                                <Link to="/results" style={{ textDecoration: 'none' }}>
-                                    <button
-                                        onClick={async () => {
-                                            if (!this.state.selectedFile) {
-                                                const response = await fetch(videoUrl);
-                                                const videoBlob = await response.blob();
-                                                this.sendVideoToBackend(videoBlob);
-                                            } else {
-                                                this.handleSendUploadedFile();
-                                            }
-                                        }}
-                                        style={{
-                                            padding: '10px 20px',
-                                            fontSize: '16px',
-                                            backgroundColor: '#370173',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '5px',
-                                            cursor: 'pointer',
-                                        }}
-                                    >
-                                        Analyze
-                                    </button>
-                                </Link>
-                            </div>
+                                }}>Analyze</button>
+                            </Link>
                         </div>
-                    )}
-
-                    <div style={{ marginTop: '40px', textAlign: 'center' }}>
-                        <h3 style={{ color: 'white' }}>Or Upload a Video</h3>
-                        <input
-                            type="file"
-                            accept="video/*"
-                            onChange={this.handleFileUpload}
-                            style={{
-                                padding: '10px',
-                                fontSize: '16px',
-                                borderRadius: '5px',
-                                display: 'block',
-                                margin: '10px auto',
-                                color: 'white'
-                            }}
-                        />
                     </div>
-                </Box>
-            </div>
-        );
-    }
-}
+                )}
+
+                <div>
+                    <Typography variant="h5" sx={{ color: 'white' }}>Or Upload a Video</Typography>
+                    <input type="file" accept="video/*" onChange={handleFileUpload} />
+                </div>
+
+                <div>
+                    <Typography variant="h5" sx={{ color: 'white' }}>Enter Topic</Typography>
+                    <input 
+                        type="text" 
+                        value={selectedTopic} 
+                        onChange={(e) => setSelectedTopic(e.target.value)} 
+                        placeholder="Enter topic" 
+                        style={{ padding: '10px', fontSize: '16px', marginTop: '10px' }}
+                    />
+                </div>
+            </Box>
+        </div>
+    );
+};
 
 export default VideoRecorder;

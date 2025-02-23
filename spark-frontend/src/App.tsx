@@ -10,7 +10,6 @@ import React from 'react'
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import theme from "./theme";
 import AnalyticsPage from "./pages/AnalyticsPage.tsx";
-import Recording from "./pages/Recording.tsx"; // Import theme file
 
 function App() {
     return (
