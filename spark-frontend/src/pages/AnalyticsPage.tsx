@@ -9,8 +9,7 @@ import Navbar from "../components/Navbar.tsx";
 const AnalyticsPage: React.FC = () => {
     const { topic } = useParams<{ topic: string }>();
     const [records, setRecords] = useState<{ timestamp: string; score: number }[]>([]);
-    const [trendMessage, setTrendMessage] = useState<string>(""); // State for analysis message
-    const { user } = useAuth0();
+    const { handleRedirectCallback, isAuthenticated, user, getAccessTokenSilently } = useAuth0();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -62,9 +61,9 @@ const AnalyticsPage: React.FC = () => {
     };
 
     return (
-        <Box sx={{ width: "100vw", height: "100vh", p: 3, backgroundColor: "#1B2034"}}>
+        <Box sx={{ width: "100vw", height: "100vh", p: 3 }}>
             <Navbar />
-            <Typography variant="h4" fontWeight="bold" sx={{ mb: 3, textAlign: "center", paddingTop: 5, color: "white"}}>
+            <Typography variant="h4" fontWeight="bold" sx={{ mb: 3, textAlign: "center", paddingTop: 5 }}>
                 {user?.name}'s Analytics for {topic}
             </Typography>
             <Grid container spacing={2}>
@@ -74,7 +73,7 @@ const AnalyticsPage: React.FC = () => {
                         <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
                             Records Table
                         </Typography>
-                        <TableContainer sx={{ maxHeight: 500, overflow: "auto" }}>
+                        <TableContainer>
                             <Table>
                                 <TableHead>
                                     <TableRow>
