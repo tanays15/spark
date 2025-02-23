@@ -17,7 +17,7 @@ const ProfilePage = () => {
             if (isAuthenticated && user) {
                 try {
                     const token = await getAccessTokenSilently(); // Get Auth0 access token (if needed)
-                    const response = await fetch("http://localhost:5000/users", {
+                    const response = await fetch("http://localhost:5000/user", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",

@@ -14,6 +14,7 @@ function App() {
          <Route path="/auth" element={<AuthPage />} />
          <Route path="/main" element={<MainPage />} />
          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/analytics/:topic" element={<ProfilePage/>} />
       </Routes>
    );
 }
