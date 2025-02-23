@@ -135,7 +135,7 @@ const ProfilePage = () => {
                             fontFamily: "Segoe UI Symbol",
                         }}
                     >
-                        Topics
+                        {user?.name}'s Topics
                     </Typography>
                     <Table sx={{ width: "100%", borderRadius: 7}} aria-label="simple table">
                         <TableHead>

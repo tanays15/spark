@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Box, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { useAuth0 } from "@auth0/auth0-react";
 import { format } from "date-fns"; // Import the format function from date-fns
 import Navbar from "../components/Navbar.tsx";
 
 const AnalyticsPage: React.FC = () => {
     const { topic } = useParams<{ topic: string }>();
-    const [records, setRecords] = useState<{ timestamp: string; score: number }[]>([]);
+    const [records, setRecords] = useState<{ timestamp: string; score: number; contentScore: number; confidenceScore: number }[]>([]);
     const { handleRedirectCallback, isAuthenticated, user, getAccessTokenSilently } = useAuth0();
+    const [trendMessage, setTrendMessage] = useState<string>(""); // State for analysis message
 
     useEffect(() => {
         const fetchData = async () => {
@@ -19,6 +20,8 @@ const AnalyticsPage: React.FC = () => {
                 const formattedData = data.map((record: any, index: number) => ({
                     timestamp: format(new Date(record.created_at), "MM/yy HH:mm"),
                     score: record.score,
+                    contentScore: record.contentScore, // Include contentScore
+                    confidenceScore: record.confidenceScore, // Include confidenceScore
                     index: index + 1 // Numerical index for regression
                 }));
                 setRecords(formattedData);
@@ -61,24 +64,26 @@ const AnalyticsPage: React.FC = () => {
     };
 
     return (
-        <Box sx={{ width: "100vw", height: "100vh", p: 3 }}>
+        <Box sx={{ width: "100vw", height: "100vh", p: 3, backgroundColor: "#1b2034"}}>
             <Navbar />
-            <Typography variant="h4" fontWeight="bold" sx={{ mb: 3, textAlign: "center", paddingTop: 5 }}>
+            <Typography variant="h4" fontWeight="bold" sx={{ mb: 3, textAlign: "center", paddingTop: 5, color: "white" }}>
                 {user?.name}'s Analytics for {topic}
             </Typography>
             <Grid container spacing={2}>
                 {/* Left Side - Records Table */}
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={6} overflow='auto'>
                     <Paper elevation={3} sx={{ p: 2 }}>
                         <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
                             Records Table
                         </Typography>
-                        <TableContainer>
+                        <TableContainer sx={{ overflow: 'auto', maxHeight: '500px' }}>
                             <Table>
                                 <TableHead>
                                     <TableRow>
                                         <TableCell>Timestamp</TableCell>
-                                        <TableCell>Score</TableCell>
+                                        <TableCell>Overall Score</TableCell>
+                                        <TableCell>Content Score</TableCell>
+                                        <TableCell>Confidence Score</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -86,6 +91,8 @@ const AnalyticsPage: React.FC = () => {
                                         <TableRow key={index}>
                                             <TableCell>{record.timestamp}</TableCell>
                                             <TableCell>{record.score}</TableCell>
+                                            <TableCell>{record.contentScore}</TableCell>
+                                            <TableCell>{record.confidenceScore}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -107,6 +114,19 @@ const AnalyticsPage: React.FC = () => {
                                 <YAxis domain={['auto', 'auto']} />
                                 <Tooltip />
                                 <Line type="monotone" dataKey="score" stroke="#3874cb" strokeWidth={2} />
+                                <Line type="monotone" dataKey="contentScore" stroke="#82ca9d" strokeWidth={2} />
+                                <Line type="monotone" dataKey="confidenceScore" stroke="#ff7300" strokeWidth={2} />
+                                <Legend
+                                    layout="horizontal"
+                                    align="center"
+                                    verticalAlign="top"
+                                    wrapperStyle={{ paddingBottom: 10 }}
+                                    payload={[
+                                        { value: 'Overall Score', type: 'line', color: '#3874cb' },
+                                        { value: 'Content Score', type: 'line', color: '#82ca9d' },
+                                        { value: 'Confidence Score', type: 'line', color: '#ff7300' }
+                                    ]}
+                                />
                             </LineChart>
                         </ResponsiveContainer>
                         <Typography variant="body1" fontWeight="bold" sx={{ mt: 2, textAlign: "center" }}>
