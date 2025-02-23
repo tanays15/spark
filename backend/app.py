@@ -9,6 +9,7 @@ from routes import register_routes
 app = Flask(__name__)
 app.config.from_object(Config)
 
+# Enable CORS for all routes and allow requests from frontend URL
 CORS(app)
 
 # Initialize Database

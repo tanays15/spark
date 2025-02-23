@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { ReactMediaRecorder } from 'react-media-recorder';
 import { Box } from "@mui/system";
 import Navbar from '../components/Navbar';
-import { auto } from 'openai/_shims/registry.mjs';
+//import { auto } from 'openai/_shims/registry.mjs';
 
 interface VideoRecorderState {
   isRecording: boolean;

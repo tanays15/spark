@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Box, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import {useAuth0} from "@auth0/auth0-react";
+import { useAuth0 } from "@auth0/auth0-react";
+import Navbar from "../components/Navbar.tsx";
 
 const AnalyticsPage: React.FC = () => {
     const { topic } = useParams<{ topic: string }>();
@@ -24,6 +25,9 @@ const AnalyticsPage: React.FC = () => {
 
     return (
         <Box sx={{ width: "100vw", height: "100vh", p: 3 }}>
+            {/* Add Navbar here */}
+            <Navbar />
+
             <Typography variant="h4" fontWeight="bold" sx={{ mb: 3, textAlign: "center" }}>
                 Analytics for {topic}
             </Typography>
