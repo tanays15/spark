@@ -50,7 +50,7 @@ const Results: React.FC = () => {
             <Navbar />
 
             {/* Full Page Layout */}
-            <Box sx={{ width: "100vw", minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingTop: "80px", backgroundColor: "#f4f6f8" }}>
+            <Box sx={{ width: "100vw", minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingTop: "80px", backgroundColor: "#1b2034" }}>
                 <Container maxWidth="md">
                     
                     {/* Show Loading Spinner */}

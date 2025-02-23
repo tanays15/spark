@@ -62,9 +62,9 @@ const AnalyticsPage: React.FC = () => {
     };
 
     return (
-        <Box sx={{ width: "100vw", height: "100vh", p: 3 }}>
+        <Box sx={{ width: "100vw", height: "100vh", p: 3, backgroundColor: "#1B2034"}}>
             <Navbar />
-            <Typography variant="h4" fontWeight="bold" sx={{ mb: 3, textAlign: "center", paddingTop: 5 }}>
+            <Typography variant="h4" fontWeight="bold" sx={{ mb: 3, textAlign: "center", paddingTop: 5, color: "white"}}>
                 {user?.name}'s Analytics for {topic}
             </Typography>
             <Grid container spacing={2}>
@@ -96,12 +96,12 @@ const AnalyticsPage: React.FC = () => {
                 </Grid>
 
                 {/* Right Side - Line Graph and Analysis */}
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={6} sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
                     <Paper elevation={3} sx={{ p: 2 }}>
                         <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
                             Your Progress Over Time
                         </Typography>
-                        <ResponsiveContainer width="100%" height={300}>
+                        <ResponsiveContainer width="100%" height={460}>
                             <LineChart data={records}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="timestamp" />

@@ -128,7 +128,7 @@ const ProfilePage = () => {
                         sx={{
                             padding: 2,
                             textAlign: "center",
-                            backgroundColor: "#61749e",
+                            backgroundColor: "#2f95c4",
                             color: "white",
                             mb: 2,
                             fontWeight: "bold",

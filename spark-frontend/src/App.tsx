@@ -20,6 +20,7 @@ function App() {
          <Route path="/profile" element={<ProfilePage />} />
          <Route path="/analytics/:topic" element={<AnalyticsPage />}/>
          <Route path="/record" element={<Recording />}/>
+         <Route path="/results" element={<Results />}/>
          <Route path="/logout" element={<Results />} />
       </Routes>
    );

@@ -21,7 +21,7 @@ const Navbar: React.FC = () => {
                     height: "50px", // Smaller height
                     display: "flex",
                     justifyContent: "center",
-                    bgcolor: "#2C2F3F",
+                    bgcolor: "#404560",
                 }}
             >
                 <Toolbar sx={{ display: "flex", justifyContent: "space-between", minHeight: "50px"}}>
