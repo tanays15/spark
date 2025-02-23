@@ -32,7 +32,7 @@ const ProfilePage = () => {
             if (isAuthenticated && user) {
                 try {
                     const token = await getAccessTokenSilently();
-                    const response = await fetch("http://127.0.0.1:5000/users", {
+                    const response = await fetch("http://localhost:5000/users", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -61,7 +61,7 @@ const ProfilePage = () => {
             if (isAuthenticated && user) {
                 try {
                     const response = await fetch(
-                        `http://127.0.0.1:5000/topics?username=${user.name}`
+                        `http://localhost:5000/topics?username=${user.name}`
                     );
                     if (!response.ok) {
                         throw new Error("Failed to fetch data");
@@ -84,7 +84,7 @@ const ProfilePage = () => {
             if (location.search.includes("code=") && location.search.includes("state=")) {
                 try {
                     await handleRedirectCallback();
-                    navigate( "/profile");
+                    navigate("/profile");
                 } catch (error) {
                     console.error("Error during redirect callback:", error);
                 }
@@ -122,7 +122,7 @@ const ProfilePage = () => {
                 sx={{ height: "calc(100vh - 75px)", width: "100vw" }}
                 backgroundColor="#121829"
             >
-                <TableContainer component={Paper} sx={{ width: "90%", marginTop: 5, backgroundColor: "#1B2034"}}>
+                <TableContainer component={Paper} sx={{ width: "90%", marginTop: 5, backgroundColor: "#1B2034" }}>
                     <Typography
                         variant="h4"
                         sx={{
@@ -137,7 +137,7 @@ const ProfilePage = () => {
                     >
                         {user?.name}'s Topics
                     </Typography>
-                    <Table sx={{ width: "100%", borderRadius: 7}} aria-label="simple table">
+                    <Table sx={{ width: "100%", borderRadius: 7 }} aria-label="simple table">
                         <TableHead>
                             <TableRow sx={{ backgroundColor: "#262C44" }}>
                                 <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", textAlign: "center", color: "white" }}>Name</TableCell>
@@ -151,7 +151,7 @@ const ProfilePage = () => {
                             {data && data.length > 0 ? (
                                 data.map((row) => (
                                     <TableRow key={row.id} sx={{ backgroundColor: "#1B2034" }}>
-                                        <TableCell sx={{ fontSize: "1rem", textAlign: "center", color: "white"}}>
+                                        <TableCell sx={{ fontSize: "1rem", textAlign: "center", color: "white" }}>
                                             <Link to={`/analytics/${row.name}`} style={{ textDecoration: 'underline', color: '#4FC3F7' }}>
                                                 {row.name}
                                             </Link>

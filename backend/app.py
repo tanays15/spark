@@ -10,7 +10,8 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 # Enable CORS for all routes and allow requests from frontend URL
-CORS(app)
+# Explicitly allowing all origins
+CORS(app, resources={r"/*": {"origins": "*"}})
 # CORS(app, origins=["http://127.0.0.1:5173"])
 
 # Initialize Database
