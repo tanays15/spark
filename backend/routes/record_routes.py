@@ -50,9 +50,9 @@ def manage_records():
         return jsonify([record.to_dict() for record in records]), 200
     elif request.method == "POST":
 
-        username = request.form.get("userId")
+        username = request.form.get("user")
         topicName = request.form.get("topic")
-        file = request.files.get("video")
+        file = request.files.get("file")
         # contentScore = data.get("contentScore")
         # confidenceScore = data.get("confidenceScore")
         # totalScore = (contentScore + confidenceScore) // 2
