@@ -15,13 +15,14 @@ const AnalyticsPage: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(`http://127.0.0.1:5000/records?username=${user?.name}&topic=${topic}`);
+                const response = await fetch(`http://127.0.0.1:5000/records?username=${user?.sub}&topic=${topic}`);
                 const data = await response.json();
                 const formattedData = data.map((record: any, index: number) => ({
                     timestamp: format(new Date(record.created_at), "MM/yy HH:mm"),
                     score: record.score,
                     contentScore: record.contentScore, // Include contentScore
-                    confidenceScore: record.confidenceScore, // Include confidenceScore
+                    audioScore: record.audioScore, // Include confidenceScore
+                    visualScore: record.visualScore,
                     index: index + 1 // Numerical index for regression
                 }));
                 setRecords(formattedData);
@@ -64,7 +65,7 @@ const AnalyticsPage: React.FC = () => {
     };
 
     return (
-        <Box sx={{ width: "100vw", height: "100vh", p: 3, backgroundColor: "#1b2034"}}>
+        <Box sx={{ width: "100vw", height: "100vh", p: 3, backgroundColor: "#1b2034" }}>
             <Navbar />
             <Typography variant="h4" fontWeight="bold" sx={{ mb: 3, textAlign: "center", paddingTop: 5, color: "white" }}>
                 {user?.name}'s Analytics for {topic}
@@ -83,7 +84,8 @@ const AnalyticsPage: React.FC = () => {
                                         <TableCell>Timestamp</TableCell>
                                         <TableCell>Overall Score</TableCell>
                                         <TableCell>Content Score</TableCell>
-                                        <TableCell>Confidence Score</TableCell>
+                                        <TableCell>Audio Score</TableCell>
+                                        <TableCell>Video Score</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -92,7 +94,8 @@ const AnalyticsPage: React.FC = () => {
                                             <TableCell>{record.timestamp}</TableCell>
                                             <TableCell>{record.score}</TableCell>
                                             <TableCell>{record.contentScore}</TableCell>
-                                            <TableCell>{record.confidenceScore}</TableCell>
+                                            <TableCell>{record.audioScore}</TableCell>
+                                            <TableCell>{record.visualScore}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -115,7 +118,8 @@ const AnalyticsPage: React.FC = () => {
                                 <Tooltip />
                                 <Line type="monotone" dataKey="score" stroke="#3874cb" strokeWidth={2} />
                                 <Line type="monotone" dataKey="contentScore" stroke="#82ca9d" strokeWidth={2} />
-                                <Line type="monotone" dataKey="confidenceScore" stroke="#ff7300" strokeWidth={2} />
+                                <Line type="monotone" dataKey="audioScore" stroke="#ff7300" strokeWidth={2} />
+                                <Line type="monotone" dataKey="visualScore" stroke="#ff1311" strokeWidth={2} />
                                 <Legend
                                     layout="horizontal"
                                     align="center"
@@ -124,7 +128,8 @@ const AnalyticsPage: React.FC = () => {
                                     payload={[
                                         { value: 'Overall Score', type: 'line', color: '#3874cb' },
                                         { value: 'Content Score', type: 'line', color: '#82ca9d' },
-                                        { value: 'Confidence Score', type: 'line', color: '#ff7300' }
+                                        { value: 'Audio Score', type: 'line', color: '#ff7300' },
+                                        { value: 'Visual Score', type: 'line', color: '#ff1311' }
                                     ]}
                                 />
                             </LineChart>
