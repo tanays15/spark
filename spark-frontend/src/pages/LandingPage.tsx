@@ -15,7 +15,8 @@ const slides = [
             " confidence level. Speech is transcribed using Whisper API, and its correctness is assessed with GPT" +
             " API. Our technology stack includes Librosa for detailed audio analysis (e.g., pitch, rate of speech," +
             " stuttering)," + " Whisper API for converting speech to text, and OpenCV for tracking facial expressions and behavioral" +
-            " cues. These data points are processed in real-time, using machine learning models to evaluate both the delivery (e.g., tone, emotional cues) and accuracy of speech content. SPARK offers feedback on both confidence and correctness, while tracking user progress over time."
+            " cues. These data points are processed in real-time, using machine learning models to evaluate both" +
+            " the delivery (e.g., tone, emotional cues) and accuracy of speech content. SPARK offers feedback on both confidence and correctness, while tracking user progress over time."
     },
     {
         title: "Track Your Progress",
