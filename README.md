@@ -65,10 +65,7 @@ psql -U your_user -d your_database -f schema.sql
 - Add gamification elements to encourage learning.
 
 ## Contributors
-- Adrian Maliackel & Team
-
-## License
-This project is open-source and available under the MIT License.
+- Adrian Maliackel, Shrenick Gannamani, Tanay Sahasrabudhe, Siddarth Perabathini
 
 ---
 
