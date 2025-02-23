@@ -9,7 +9,14 @@ const slides = [
     },
     {
         title: "How SPARK Works",
-        content: "SPARK uses facial recognition, speech pattern analysis, and real-time transcription to evaluate confidence. Our advanced algorithms process each element to generate a feedback score that is accurate and actionable. This helps individuals adjust their delivery and gain insights into their communication style."
+        content: "SPARK utilizes advanced AI models to assess communication effectiveness by analyzing " +
+            " various speech and behavioral factors. We collect audio data such as voice pitch, tone, and pauses, as" +
+            " well as facial expressions and behavioral signals like hand fidgeting, to evaluate a speaker’s" +
+            " confidence level. Speech is transcribed using Whisper API, and its correctness is assessed with GPT" +
+            " API. Our technology stack includes Librosa for detailed audio analysis (e.g., pitch, rate of speech," +
+            " stuttering)," + " Whisper API for converting speech to text, and OpenCV for tracking facial expressions and behavioral" +
+            " cues. These data points are processed in real-time, using machine learning models to evaluate both" +
+            " the delivery (e.g., tone, emotional cues) and accuracy of speech content. SPARK offers feedback on both confidence and correctness, while tracking user progress over time."
     },
     {
         title: "Track Your Progress",
@@ -27,36 +34,16 @@ const LandingPage: React.FC = () => {
     useEffect(() => {
         const intervalId = setInterval(() => {
             setSlideDirection("left");
-            setSlideIn(false); // Trigger slide-out animation
+            setSlideIn(false);
 
             setTimeout(() => {
                 setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
-                setSlideIn(true); // Trigger slide-in animation
-            }, 400); // Wait for slide-out animation to complete
-        }, 15000); // Change slide every 5 seconds
+                setSlideIn(true);
+            }, 400);
+        }, 15000);
 
-        return () => clearInterval(intervalId); // Clean up on component unmount
+        return () => clearInterval(intervalId);
     }, []);
-
-    const handleNext = () => {
-        setSlideDirection("left");
-        setSlideIn(false); // Trigger slide-out animation
-
-        setTimeout(() => {
-            setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
-            setSlideIn(true); // Trigger slide-in animation
-        }, 500); // Wait for slide-out animation to complete
-    };
-
-    const handlePrev = () => {
-        setSlideDirection("right");
-        setSlideIn(false); // Trigger slide-out animation
-
-        setTimeout(() => {
-            setCurrentIndex((prevIndex) => (prevIndex - 1 + slides.length) % slides.length);
-            setSlideIn(true); // Trigger slide-in animation
-        }, 500); // Wait for slide-out animation to complete
-    };
 
     return (
         <Box
@@ -67,26 +54,42 @@ const LandingPage: React.FC = () => {
                 alignItems: "center",
                 justifyContent: "center",
                 overflow: "hidden",
+                bgcolor: "#121829",
             }}
         >
             <Container maxWidth="xl" sx={{ height: "100%" }}>
                 <Grid container sx={{ height: "100%" }} alignItems="center">
                     {/* Left Side */}
                     <Grid item xs={12} md={6} sx={{ textAlign: "center" }}>
-                        <Typography variant="h2" fontWeight="bold" color="primary">
-                            SPARK
-                        </Typography>
-                        <Typography variant="subtitle1" sx={{ mb: 4 }}>
-                            Know what you know, master what you don't
-                        </Typography>
+                        {/* Rounded Box Around Title & Tagline */}
+                        <Box
+                           sx={{
+                            display: "inline-block",
+                            px: 4,
+                            py: 2,
+                            bgcolor: "#17395f", // Approximate to rgba(255, 255, 255, 0.1) for a subtle dark effect
+                            borderRadius: "20px", // Rounded corners
+                            backdropFilter: "blur(10px)", // Subtle blur effect
+                            border: "2px solid #333333", // Approximate to rgba(255, 255, 255, 0.2) for a light border
+                            textAlign: "center",
+                        }}
+                        
+                        >
+                            <Typography variant="h2" fontWeight="bold" color="primary" sx={{ fontFamily: "Segoe UI Symbol" }}>
+                                SPARK
+                            </Typography>
+                            <Typography variant="subtitle1" sx={{ fontFamily: "Segoe UI Symbol", color: "white", mt: 1 }}>
+                                Know what you know, master what you don't
+                            </Typography>
+                        </Box>
 
-                        {/* Login Button - Sends user to Auth0 for authentication */}
+                        {/* Login Button */}
                         <Button
                             variant="contained"
                             size="large"
                             color="primary"
                             fullWidth
-                            sx={{ mb: 2, maxWidth: "400px", fontSize: 15 }}
+                            sx={{ mt: 4, mb: 2, maxWidth: "400px", fontSize: 15, fontFamily: "Segoe UI Symbol", fontWeight: "medium" }}
                             onClick={() => loginWithRedirect()}
                         >
                             Login
@@ -97,7 +100,7 @@ const LandingPage: React.FC = () => {
                             variant="contained"
                             size="large"
                             fullWidth
-                            sx={{ backgroundColor: "#370173", maxWidth: "400px", fontFamily: "Arial", fontSize: 15 }}
+                            sx={{ backgroundColor: "#7e3ac9", maxWidth: "400px", fontFamily: "Segoe UI Symbol", fontSize: 15, fontWeight: "medium" }}
                             onClick={() =>
                                 loginWithRedirect({
                                     authorizationParams: { screen_hint: "signup" },
@@ -114,21 +117,21 @@ const LandingPage: React.FC = () => {
                         justifyContent: "center",
                         alignItems: "center",
                         height: "100%",
-                        p: 3
+                        p: 3,
                     }}>
                         <Paper
                             elevation={3}
                             sx={{
-                                width: "90%",
-                                maxWidth: "500px",
-                                height: "90%", // Increased height for a longer slide
+                                width: "115%",
+                                maxWidth: "1300px",
+                                height: "95%",
                                 p: 3,
-                                bgcolor: "#f5f5f5",
-                                color: "black",
+                                bgcolor: "#262C44",
+                                color: "white",
                                 textAlign: "center",
-                                border: "10px solid #370173",
+                                border: "2px solid #1c1c1c",
                                 position: "relative",
-                                overflow: "hidden",
+                                overflow: "auto",
                             }}
                         >
                             <Slide direction={slideDirection} in={slideIn} timeout={500}>
@@ -140,13 +143,13 @@ const LandingPage: React.FC = () => {
                                         width: "100%",
                                         height: "100%",
                                         padding: "20px",
-                                        boxSizing: "border-box", // Ensures padding is included in the height
+                                        boxSizing: "border-box",
                                     }}
                                 >
-                                    <Typography variant="h3" fontWeight="bold" gutterBottom sx={{ fontFamily: "Helvetica Neue" }}>
+                                    <Typography variant="h3" fontWeight="bold" gutterBottom sx={{ fontFamily: "Segoe UI Symbol", color: "white" }}>
                                         {slides[currentIndex].title}
                                     </Typography>
-                                    <Typography variant="body1" paragraph sx={{ fontFamily: "Helvetica Neue" }}>
+                                    <Typography variant="body1" paragraph sx={{ fontFamily: "Segoe UI Symbol", color: "white" }}>
                                         {slides[currentIndex].content}
                                     </Typography>
                                     <Typography
@@ -157,7 +160,7 @@ const LandingPage: React.FC = () => {
                                             bottom: "25px",
                                             left: "50%",
                                             transform: "translateX(-50%)",
-                                            fontFamily: "Helvetica Neue",
+                                            fontFamily: "Segoe UI Symbol",
                                             fontSize: 18,
                                             cursor: 'pointer',
                                             color: '#3874cb',
@@ -172,39 +175,29 @@ const LandingPage: React.FC = () => {
                                         Sign up to learn more!
                                     </Typography>
 
-                                    {/* Navigation buttons */}
-                                    <Box
-                                        sx={{
-                                            mt: 2,
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                            position: "absolute",
-                                            bottom: 16,
-                                            left: 16,
-                                            right: 16,
-                                        }}
-                                    >
+                                    {/* Circular Navigation Buttons */}
+                                    <Box sx={{
+                                        mt: 2,
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        position: "absolute",
+                                        bottom: 16,
+                                        left: 16,
+                                        right: 16,
+                                    }}>
                                         <Button
-                                            onClick={handlePrev}
+                                            onClick={() => setCurrentIndex((prevIndex) => (prevIndex - 1 + slides.length) % slides.length)}
                                             variant="contained"
-                                            size="small"
-                                            sx={{
-                                                fontSize: "6",
-                                                padding: "4px 12px",
-                                            }}
+                                            sx={{ width: 50, height: 50, borderRadius: "50%", minWidth: "auto" }}
                                         >
-                                            Previous
+                                            {"<"}
                                         </Button>
                                         <Button
-                                            onClick={handleNext}
+                                            onClick={() => setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length)}
                                             variant="contained"
-                                            size="small"
-                                            sx={{
-                                                fontSize: "6",
-                                                padding: "4px 12px",
-                                            }}
+                                            sx={{ width: 50, height: 50, borderRadius: "50%", minWidth: "auto" }}
                                         >
-                                            Next
+                                            {">"}
                                         </Button>
                                     </Box>
                                 </div>
