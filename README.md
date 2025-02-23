@@ -20,7 +20,7 @@ SPARK is a web application designed to evaluate users' confidence levels when ex
 
 ## Installation & Setup
 ### Prerequisites
-- Python 3.8+
+- Python 3.10+
 - Node.js & npm
 - PostgreSQL
 
@@ -36,22 +36,14 @@ python app.py  # Start Flask server
 ```bash
 cd frontend
 npm install
-npm start  # Runs the React app
+npm run dev  # Runs the React app
 ```
 
 ### Database Setup
 ```bash
-psql -U your_user -d your_database -f schema.sql
+psql -U postgres
+flask db upgrade
 ```
-
-## API Endpoints
-| Endpoint                 | Method | Description                          |
-|--------------------------|--------|--------------------------------------|
-| `/api/audio-analysis`    | POST   | Processes audio and returns scores  |
-| `/api/transcription`     | POST   | Converts speech to text             |
-| `/api/text-analysis`     | POST   | Evaluates correctness via GPT       |
-| `/api/visual-analysis`   | POST   | Analyzes facial and behavioral cues |
-| `/api/user-data`         | GET    | Retrieves user history & scores     |
 
 ## Usage
 1. **Log in** to track progress.
