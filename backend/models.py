@@ -29,16 +29,18 @@ class Topic(db.Model):
 
     def to_dict(self):
         avg_content = sum(record.contentScore for record in self.records)
-        avg_conf = sum(record.confidenceScore for record in self.records)
+        avg_audio = sum(record.audioScore for record in self.records)
+        avg_visual = sum(record.visualScore for record in self.records)
         avg_score = sum(record.score for record in self.records)
         record_count = len(self.records)
         if (record_count > 0):
             avg_content /= record_count
-            avg_conf /= record_count
+            avg_audio /= record_count
             avg_score /= record_count
+            avg_visual /= record_count
         return {"id": self.id, "name": self.name,
                 "avg_content_score": avg_content,
-                "average_confidence_score": avg_conf,
+                "avg_audio": avg_audio, "avg_visual": avg_visual,
                 "avg_score": avg_score,
                 "record_count": len(self.records)}
 
