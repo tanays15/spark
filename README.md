@@ -23,6 +23,7 @@ SPARK is a web application designed to evaluate users' confidence levels when ex
 - Python 3.10+
 - Node.js & npm
 - PostgreSQL
+- ffmpeg
 
 ### Backend Setup
 ```bash
@@ -30,6 +31,11 @@ python -m venv venv
 source venv/bin/activate  # On Windows use `venv\Scripts\activate`
 pip install -r requirements.txt
 python app.py  # Start Flask server
+```
+### ffmpeg Setup
+```
+brew install ffpmg
+pip install ffpmg-python
 ```
 
 ### Frontend Setup
