@@ -142,7 +142,8 @@ const ProfilePage = () => {
                             <TableRow sx={{ backgroundColor: "#262C44" }}>
                                 <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", textAlign: "center", color: "white" }}>Name</TableCell>
                                 <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", textAlign: "center", color: "white" }}>Avg Content Score</TableCell>
-                                <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", textAlign: "center", color: "white" }}>Avg Confidence Score</TableCell>
+                                <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", textAlign: "center", color: "white" }}>Avg Audio</TableCell>
+                                <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", textAlign: "center", color: "white" }}>Avg Video</TableCell>
                                 <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", textAlign: "center", color: "white" }}>Avg Score</TableCell>
                                 <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", textAlign: "center", color: "white" }}>Record Count</TableCell>
                             </TableRow>
@@ -157,7 +158,8 @@ const ProfilePage = () => {
                                             </Link>
                                         </TableCell>
                                         <TableCell sx={{ fontSize: "1rem", textAlign: "center", color: "white" }}>{row.avg_content_score.toFixed(2)}</TableCell>
-                                        <TableCell sx={{ fontSize: "1rem", textAlign: "center", color: "white" }}>{row.average_confidence_score.toFixed(2)}</TableCell>
+                                        <TableCell sx={{ fontSize: "1rem", textAlign: "center", color: "white" }}>{row.avg_audio.toFixed(2)}</TableCell>
+                                        <TableCell sx={{ fontSize: "1rem", textAlign: "center", color: "white" }}>{row.avg_visual.toFixed(2)}</TableCell>
                                         <TableCell sx={{ fontSize: "1rem", textAlign: "center", color: "white" }}>{row.avg_score.toFixed(2)}</TableCell>
                                         <TableCell sx={{ fontSize: "1rem", textAlign: "center", color: "white" }}>{row.record_count}</TableCell>
                                     </TableRow>
