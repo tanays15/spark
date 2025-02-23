@@ -4,6 +4,7 @@ import { ReactMediaRecorder } from 'react-media-recorder';
 import { Box } from "@mui/system";
 import Navbar from '../components/Navbar';
 import { auto } from 'openai/_shims/registry.mjs';
+import { useAuth0 } from '@auth0/auth0-react';
 
 interface VideoRecorderState {
   isRecording: boolean;
@@ -44,13 +45,14 @@ class VideoRecorder extends Component<{}, VideoRecorderState> {
     }
   }
 
-  sendVideoToBackend = async (videoBlob: Blob) => {
+  sendVideoToBackend = async (videoBlob: Blob, userInfo: any) => {
     const { selectedTopic } = this.state;
 
     try {
       const formData = new FormData();
       formData.append('file', videoBlob, 'video-file.webm');
-      formData.append('topic', selectedTopic); // Append selected topic to form data
+      formData.append('topic', selectedTopic); // Append selected topic to form 
+      //formData.append('username, )
 
 
       const response = await fetch('http://localhost:5000/records', {
@@ -81,7 +83,9 @@ class VideoRecorder extends Component<{}, VideoRecorderState> {
   handleSendUploadedFile = async () => {
     if (this.state.selectedFile) {
       const videoBlob = new Blob([await this.state.selectedFile.arrayBuffer()], { type: this.state.selectedFile.type });
-      this.sendVideoToBackend(videoBlob);
+
+      const { user } = useAuth0();
+      this.sendVideoToBackend(videoBlob, user);
     }
   };
 
@@ -300,7 +304,7 @@ class VideoRecorder extends Component<{}, VideoRecorderState> {
               <h3>Enter the Topic You Spoke About:</h3>
 
               {/* Dropdown for topic selection */}
-              {dropdownTopics.length > 0 && (
+              {dropdownTopics && dropdownTopics.length > 0 && (
                 <select
                   value={selectedTopic}
                   onChange={this.handleDropdownChange}
