@@ -1,341 +1,280 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Box } from '@mui/material';
+import React, { useState, useRef } from 'react';
+import { Box, Button, Typography, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { ReactMediaRecorder } from 'react-media-recorder';
-import { useAuth0 } from '@auth0/auth0-react'; // Auth0 hook import
+import { useAuth0 } from '@auth0/auth0-react';
+import Navbar from '../components/Navbar';
 
 const Recording = () => {
-  const { user, isAuthenticated, loginWithRedirect, logout } = useAuth0();
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
-  const [selectedTopic, setSelectedTopic] = useState('');
-  const [dropdownTopics, setDropdownTopics] = useState<string[]>([]);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const { user, isAuthenticated, loginWithRedirect } = useAuth0();
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState('');
+  const [dropdownTopics, setDropdownTopics] = useState<string[]>([]);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  useEffect(() => {
-    // Fetch available topics for the dropdown (for example, from a backend API)
-    const fetchTopics = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/topics');
-        const topics = await response.json();
-        setDropdownTopics(topics);
-      } catch (error) {
-        console.error('Error fetching topics:', error);
-      }
-    };
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+    if (file) {
+      setSelectedFile(file);
+      const videoUrl = URL.createObjectURL(file);
+      setVideoUrl(videoUrl);
+    }
+  };
 
-    fetchTopics();
-  }, []);
+  const handleDropdownChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    setSelectedTopic(event.target.value as string);
+  };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files ? event.target.files[0] : null;
-    if (file) {
-      setSelectedFile(file);
-      const videoUrl = URL.createObjectURL(file);
-      setVideoUrl(videoUrl);
-    }
-  };
+  const handleTopicChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedTopic(event.target.value);
+  };
 
-  const handleDropdownChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedTopic(event.target.value);
-  };
+  const handleSendUploadedFile = async () => {
+    if (!selectedFile) return;
+    try {
+      const formData = new FormData();
+      formData.append('video', selectedFile);
+      formData.append('userId', user?.sub || 'anonymous');
+      formData.append('topic', selectedTopic);
 
-  const handleTopicChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedTopic(event.target.value);
-  };
+      const response = await fetch('http://localhost:5000/records', {
+        method: 'POST',
+        body: formData,
+      });
 
-  const handleSendUploadedFile = async () => {
-    if (!selectedFile) return;
-    try {
-      const formData = new FormData();
-      formData.append('video', selectedFile);
-      formData.append('userId', user?.sub || 'anonymous');
-      formData.append('topic', selectedTopic);
+      if (response.ok) {
+        console.log('File uploaded successfully!');
+      } else {
+        console.error('File upload failed');
+      }
+    } catch (error) {
+      console.error('Error sending uploaded file:', error);
+    }
+  };
 
-      const response = await fetch('http://localhost:5000/records', {
-        method: 'POST',
-        body: formData,
-      });
+  const sendVideoToBackend = async (videoBlob: Blob, user: any) => {
+    try {
+      const formData = new FormData();
+      formData.append('video', videoBlob);
+      formData.append('userId', user?.sub || 'anonymous');
+      formData.append('topic', selectedTopic);
 
-      if (response.ok) {
-        console.log('File uploaded successfully!');
-      } else {
-        console.error('File upload failed');
-      }
-    } catch (error) {
-      console.error('Error sending uploaded file:', error);
-    }
-  };
+      const response = await fetch('http://localhost:5000/records', {
+        method: 'POST',
+        body: formData,
+      });
 
-  const sendVideoToBackend = async (videoBlob: Blob, user: any) => {
-    try {
-      const formData = new FormData();
-      formData.append('video', videoBlob);
-      formData.append('userId', user?.sub || 'anonymous');
-      formData.append('topic', selectedTopic);
+      if (response.ok) {
+        console.log('Video sent for analysis');
+      } else {
+        console.error('Video analysis request failed');
+      }
+    } catch (error) {
+      console.error('Error sending video:', error);
+    }
+  };
 
-      const response = await fetch('http://localhost:5000/records', {
-        method: 'POST',
-        body: formData,
-      });
+  return (
+    <div>
+      <Navbar />
+      <Box
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+        sx={{
+          height: 'calc(100vh - 75px)',
+          width: '100vw',
+          fontFamily: 'Helvetica Neue',
+          overflow: 'auto',
+          padding: '20px',
+          backgroundColor: '#1b2034',
+          color: 'white',
+          margin: '0 auto',
+        }}
+      >
+        {!isAuthenticated ? (
+          <Button
+            onClick={() => loginWithRedirect()}
+            variant="contained"
+            sx={{ backgroundColor: '#3874cb', marginBottom: '20px' }}
+          >
+            Log in
+          </Button>
+        ) : (
+          <>
+            <Typography variant="h5" sx={{ color: 'white', marginBottom: '20px' }}>
+              Welcome, {user?.name}
+            </Typography>
+          </>
+        )}
 
-      if (response.ok) {
-        console.log('Video sent for analysis');
-      } else {
-        console.error('Video analysis request failed');
-      }
-    } catch (error) {
-      console.error('Error sending video:', error);
-    }
-  };
+        {/* Live Camera Feed */}
+        {isRecording && (
+          <Box sx={{ marginBottom: '20px', textAlign: 'center' }}>
+            <video
+              ref={videoRef}
+              autoPlay
+              muted
+              style={{ width: '80%', maxWidth: '500px', borderRadius: '10px' }}
+            />
+          </Box>
+        )}
 
-  return (
-    <div>
-      <Box style={{ textAlign: 'center', padding: '20px' }}>
-        {/* Auth0 Login / Logout */}
-        {!isAuthenticated ? (
-          <button
-            onClick={() => loginWithRedirect()}
-            style={{
-              padding: '10px 20px',
-              fontSize: '16px',
-              backgroundColor: '#3874cb',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              marginBottom: '20px',
-            }}
-          >
-            Log in
-          </button>
-        ) : (
-          <>
-            <p>Welcome, {user?.name}</p>
-            <button
-              onClick={() => logout({ returnTo: window.location.origin })}
-              style={{
-                padding: '10px 20px',
-                fontSize: '16px',
-                backgroundColor: '#370173',
-                color: 'white',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer',
-                marginBottom: '20px',
-              }}
-            >
-              Log out
-            </button>
-          </>
-        )}
+        <ReactMediaRecorder
+          video
+          onStart={async () => {
+            setIsRecording(true);
+            try {
+              const stream = await navigator.mediaDevices.getUserMedia({
+                video: true,
+                audio: true,
+              });
 
-        {/* Recording Section */}
-        <ReactMediaRecorder
-          video
-          onStart={async () => {
-            setIsRecording(true);
-            try {
-              const stream = await navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: true,
-              });
+              if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+              }
+            } catch (error) {
+              console.error('Error accessing media devices:', error);
+            }
+          }}
+          onStop={async (blobUrl: string) => {
+            setIsRecording(false);
+            setVideoUrl(blobUrl);
 
-              setMediaStream(stream);
-              if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-                setTimeout(() => {
-                  if (videoRef.current) {
-                    videoRef.current.play().catch((error) =>
-                      console.error('Video play error:', error)
-                    );
-                  }
-                }, 100);
-              }
-            } catch (error) {
-              console.error('Error accessing media devices:', error);
-            }
-          }}
-          onStop={async (blobUrl: string) => {
-            setIsRecording(false);
-            setVideoUrl(blobUrl);
+            if (videoRef.current && videoRef.current.srcObject) {
+              const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+              tracks.forEach(track => track.stop());
+              videoRef.current.srcObject = null; // Clear the video source
+            }
+          }}
+          render={({ startRecording, stopRecording }) => (
+            <Box display="flex" justifyContent="center" alignItems="center" gap={2} flexDirection="column">
+              {!isRecording && !videoUrl && (
+                <Button
+                  onClick={startRecording}
+                  variant="contained"
+                  sx={{ backgroundColor: '#3874cb', marginBottom: '20px' }}
+                >
+                  Start Recording
+                </Button>
+              )}
 
-            if (mediaStream) {
-              mediaStream.getTracks().forEach((track) => track.stop());
-            }
-          }}
-          render={({ startRecording, stopRecording }) => (
-            <div>
-              {!isRecording && !videoUrl && (
-                <button
-                  onClick={startRecording}
-                  style={{
-                    padding: '10px 20px',
-                    fontSize: '16px',
-                    backgroundColor: '#3874cb',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Start Recording
-                </button>
-              )}
+              {isRecording && (
+                <Button
+                  onClick={stopRecording}
+                  variant="contained"
+                  sx={{ backgroundColor: '#370173', marginBottom: '20px' }}
+                >
+                  Stop Recording
+                </Button>
+              )}
+            </Box>
+          )}
+        />
 
-              {isRecording && (
-                <button
-                  onClick={stopRecording}
-                  style={{
-                    padding: '10px 20px',
-                    fontSize: '16px',
-                    backgroundColor: '#370173',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Stop Recording
-                </button>
-              )}
-            </div>
-          )}
-        />
+        {/* Video Upload Section */}
+        <div style={{ marginTop: '20px' }}>
+          <Typography variant="h6" align="center">
+            Or Upload a Video
+          </Typography>
+          <input
+            type="file"
+            accept="video/*"
+            onChange={handleFileUpload}
+            style={{
+              padding: '10px',
+              fontSize: '16px',
+              borderRadius: '5px',
+              display: 'block',
+              margin: '0 auto',
+            }}
+          />
+        </div>
 
-        {/* Video Upload Section */}
-        <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <div style={{ textAlign: 'center' }}>
-            <h3>Or Upload a Video</h3>
-            <input
-              type="file"
-              accept="video/*"
-              onChange={handleFileUpload}
-              style={{
-                padding: '10px',
-                fontSize: '16px',
-                borderRadius: '5px',
-                display: 'block',
-                margin: '0 auto',
-              }}
-            />
-          </div>
-        </div>
+        {/* Video Preview (For Both Recorded and Uploaded Videos) */}
+        {videoUrl && (
+          <Box sx={{ marginTop: '20px', textAlign: 'center' }}>
+            <Typography variant="h6">Preview</Typography>
+            <video controls src={videoUrl} style={{ width: '80%', maxWidth: '500px', borderRadius: '10px' }} />
 
-        {/* Video Preview (For Both Recorded and Uploaded Videos) */}
-        {videoUrl && (
-          <div style={{ marginTop: '20px', textAlign: 'center' }}>
-            <h3>Preview</h3>
-            <video controls src={videoUrl} style={{ width: '80%', maxWidth: '500px' }} />
+            <Box sx={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
+              <Button
+                onClick={() => {
+                  setVideoUrl(null);
+                  setIsRecording(false);
+                  setSelectedFile(null);
+                }}
+                variant="contained"
+                sx={{ backgroundColor: '#3874cb' }}
+              >
+                {selectedFile ? 'Upload Another File' : 'Record Again'}
+              </Button>
 
-            <div
-              style={{
-                marginTop: '20px',
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '10px',
-              }}
-            >
-              {/* Record Again Button */}
-              <button
-                onClick={() =>
-                  setVideoUrl(null) &&
-                  setIsRecording(false) &&
-                  setMediaStream(null) &&
-                  setSelectedFile(null)
-                }
-                style={{
-                  padding: '10px 20px',
-                  fontSize: '16px',
-                  backgroundColor: '#3874cb',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                }}
-              >
-                {selectedFile ? 'Upload Another File' : 'Record Again'}
-              </button>
+              <Button
+                onClick={async () => {
+                  if (!selectedFile) {
+                    const response = await fetch(videoUrl);
+                    const videoBlob = await response.blob();
+                    if (user) {
+                      sendVideoToBackend(videoBlob, user);
+                    } else {
+                      console.error('User not authenticated');
+                    }
+                  } else {
+                    handleSendUploadedFile();
+                  }
+                }}
+                variant="contained"
+                sx={{ backgroundColor: '#370173' }}
+              >
+                Analyze
+              </Button>
+            </Box>
+          </Box>
+        )}
 
-              {/* Send to Backend Button */}
-              <button
-                onClick={async () => {
-                  if (!selectedFile) {
-                    const response = await fetch(videoUrl);
-                    const videoBlob = await response.blob();
-                    if (user) {
-                      sendVideoToBackend(videoBlob, user);
-                    } else {
-                      console.error('User not authenticated');
-                    }
-                  } else {
-                    handleSendUploadedFile();
-                  }
-                }}
-                style={{
-                  padding: '10px 20px',
-                  fontSize: '16px',
-                  backgroundColor: '#370173',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                }}
-              >
-                Analyze
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Topic Input (Dropdown or Text Input) */}
+        {videoUrl && (
+          <Box sx={{ marginTop: '20px', width: '100%', maxWidth: '400px' }}>
+            <Typography variant="h6" align="center">
+              Enter the Topic You Spoke About:
+            </Typography>
 
-        {/* Topic Input (Dropdown or Text Input) */}
-        {videoUrl && (
-          <div style={{ marginTop: '20px' }}>
-            <h3>Enter the Topic You Spoke About:</h3>
+            {dropdownTopics.length > 0 && (
+              <FormControl fullWidth>
+                <InputLabel>Choose a Topic</InputLabel>
+                <Select value={selectedTopic} onChange={handleDropdownChange} label="Choose a Topic">
+                  <MenuItem value="">Select a topic</MenuItem>
+                  {dropdownTopics.map((topic, index) => (
+                    <MenuItem key={index} value={topic}>
+                      {topic}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
 
-            {dropdownTopics.length > 0 && (
-              <select
-                value={selectedTopic}
-                onChange={handleDropdownChange}
-                style={{
-                  padding: '10px',
-                  fontSize: '16px',
-                  borderRadius: '5px',
-                  border: '1px solid #ccc',
-                  width: '80%',
-                  maxWidth: '400px',
-                }}
-              >
-                <option value="">Select a topic</option>
-                {dropdownTopics.map((topic, index) => (
-                  <option key={index} value={topic}>
-                    {topic}
-                  </option>
-                ))}
-              </select>
-            )}
-
-            <input
-              type="text"
-              value={selectedTopic}
-              onChange={handleTopicChange}
-              placeholder="e.g., Technology, Health, Education"
-              style={{
-                padding: '10px',
-                fontSize: '16px',
-                borderRadius: '5px',
-                border: '1px solid #ccc',
-                width: '80%',
-                maxWidth: '400px',
-                marginTop: '10px',
-              }}
-            />
-          </div>
-        )}
-      </Box>
-    </div>
-  );
+            <input
+              type="text"
+              value={selectedTopic}
+              onChange={handleTopicChange}
+              placeholder="e.g., Technology, Health, Education"
+              style={{
+                padding: '10px',
+                fontSize: '16px',
+                borderRadius: '5px',
+                border: '1px solid #ccc',
+                width: '100%',
+                marginTop: '10px',
+              }}
+            />
+          </Box>
+        )}
+      </Box>
+    </div>
+  );
 };
 
 export default Recording;
