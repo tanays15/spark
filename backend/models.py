@@ -50,10 +50,13 @@ class Record(db.Model):
     topic_id = db.Column(db.Integer, db.ForeignKey(
         "topics.id"), nullable=False)
     contentScore = db.Column(db.Integer, nullable=False)
-    confidenceScore = db.Column(db.Integer, nullable=False)
+    visualScore = db.Column(db.Integer, nullable=False)
+    audioScore = db.Column(db.Integer, nullable=False)
     score = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime(timezone=True),
                            server_default=func.now())
+    feedback = db.Column(db.String)
+    resources = db.Column(db.String, nullable=False)
 
     user = db.relationship("User", back_populates="records")  # Fix here
     topic = db.relationship("Topic", back_populates="records")  # Fix here
@@ -64,7 +67,10 @@ class Record(db.Model):
             "user_id": self.user_id,
             "topic_id": self.topic_id,
             "contentScore": self.contentScore,
-            "confidenceScore": self.confidenceScore,
+            "visualScore": self.visualScore,
+            "audioScore": self.audioScore,
             "score": self.score,
-            "created_at": self.created_at
+            "created_at": self.created_at,
+            "feedback": self.feedback,
+            "resources": self.resources,
         }
