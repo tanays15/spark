@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify
 from models import Topic, db, Record, User
 
 record_bp = Blueprint("record_bp", __name__)
+# comment
 
 
 @record_bp.route("/records", methods=["POST", "GET"])
