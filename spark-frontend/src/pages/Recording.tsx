@@ -2,6 +2,8 @@ import { th } from 'framer-motion/client';
 import React, { Component } from 'react';
 import { ReactMediaRecorder } from 'react-media-recorder';
 import { Box } from "@mui/system";
+import Navbar from '../components/Navbar';
+import { auto } from 'openai/_shims/registry.mjs';
 
 interface VideoRecorderState {
   isRecording: boolean;
@@ -44,7 +46,7 @@ class VideoRecorder extends Component<{}, VideoRecorderState> {
 
   sendVideoToBackend = async (videoBlob: Blob) => {
     const { selectedTopic } = this.state;
-    
+
     try {
       const formData = new FormData();
       formData.append('file', videoBlob, 'video-file.webm');
@@ -55,6 +57,8 @@ class VideoRecorder extends Component<{}, VideoRecorderState> {
         method: 'POST',
         body: formData,
       });
+
+      
 
       const result = await response.json();
       if (response.ok) {
@@ -97,23 +101,23 @@ class VideoRecorder extends Component<{}, VideoRecorderState> {
 
   render() {
     const { isRecording, videoUrl, selectedFile, mediaStream, selectedTopic, dropdownTopics, isDropdownActive } = this.state;
-  
+
     return (
       <div
         style={{
           textAlign: 'center',
           padding: '20px',
-          height: '100vh',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
         }}
       >
-        <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" sx={{ height: 'calc(100vh - 75px)', width: '100vw', fontFamily: "Helvetica Neue" }}>
-  
+        <Navbar style={{ marginBottom: '20px' }}/>
+        <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" sx={{ height: 'calc(100vh - 75px)', width: '100vw', fontFamily: "Helvetica Neue", overflow: 'auto', marginTop: '40px' }}>
+
           <h1>Record a Video</h1>
-  
+
           {/* Camera Feed (Visible Only While Recording) */}
           {isRecording && mediaStream && (
             <div
@@ -139,21 +143,21 @@ class VideoRecorder extends Component<{}, VideoRecorderState> {
               />
             </div>
           )}
-  
+
           {/* Video Recording Section */}
           <ReactMediaRecorder
             video
             videoConstraints={{ mimeType: 'video/webm' }}
             onStart={async () => {
               this.setState({ isRecording: true });
-  
+
               try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-  
+
                 this.setState({ mediaStream: stream }, () => {
                   if (this.videoRef.current) {
                     this.videoRef.current.srcObject = stream;
-  
+
                     setTimeout(() => {
                       if (this.videoRef.current) {
                         this.videoRef.current.play().catch(error => console.error("Video play error:", error));
@@ -161,14 +165,14 @@ class VideoRecorder extends Component<{}, VideoRecorderState> {
                     }, 100);
                   }
                 });
-  
+
               } catch (error) {
                 console.error("Error accessing media devices:", error);
               }
             }}
             onStop={async (blobUrl: string) => {
               this.setState({ isRecording: false, videoUrl: blobUrl });
-  
+
               if (this.state.mediaStream) {
                 this.state.mediaStream.getTracks().forEach(track => track.stop());
               }
@@ -191,7 +195,7 @@ class VideoRecorder extends Component<{}, VideoRecorderState> {
                     Start Recording
                   </button>
                 )}
-  
+
                 {isRecording && (
                   <button
                     onClick={stopRecording}
@@ -211,7 +215,7 @@ class VideoRecorder extends Component<{}, VideoRecorderState> {
               </div>
             )}
           />
-  
+
           {/* Video Upload Section */}
           <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <div style={{ textAlign: 'center' }}>
@@ -231,13 +235,13 @@ class VideoRecorder extends Component<{}, VideoRecorderState> {
               />
             </div>
           </div>
-  
+
           {/* Video Preview (For Both Recorded and Uploaded Videos) */}
           {videoUrl && (
             <div style={{ marginTop: '20px', textAlign: 'center' }}>
               <h3>Preview</h3>
               <video controls src={videoUrl} style={{ width: '80%', maxWidth: '500px' }} />
-  
+
               {/* Buttons Container: Keep "Record Again" and "Analyze" on the Same Line */}
               <div
                 style={{
@@ -262,7 +266,7 @@ class VideoRecorder extends Component<{}, VideoRecorderState> {
                 >
                   {this.state.selectedFile ? 'Upload Another File' : 'Record Again'}
                 </button>
-  
+
                 {/* Send to Backend Button */}
                 <button
                   onClick={async () => {
@@ -289,12 +293,12 @@ class VideoRecorder extends Component<{}, VideoRecorderState> {
               </div>
             </div>
           )}
-  
+
           {/* Topic Input (Dropdown or Text Input) */}
           {videoUrl && (
             <div style={{ marginTop: '20px' }}>
               <h3>Enter the Topic You Spoke About:</h3>
-  
+
               {/* Dropdown for topic selection */}
               {dropdownTopics.length > 0 && (
                 <select
@@ -317,7 +321,7 @@ class VideoRecorder extends Component<{}, VideoRecorderState> {
                   ))}
                 </select>
               )}
-  
+
               {/* Text input for custom topic if no dropdown is active */}
               {(
                 <input
