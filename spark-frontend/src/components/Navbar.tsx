@@ -32,7 +32,7 @@ const Navbar: React.FC = () => {
 
                     {/* Centered Nav Links */}
                     <Box sx={{ display: "flex", gap: 4 }}>
-                        <Button color="inherit" component={Link} to="/record">
+                        <Button color="inherit" component={Link} to="/recording">
                             Record
                         </Button>
                         <Button color="inherit" component={Link} to="/">
