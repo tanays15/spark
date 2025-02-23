@@ -66,7 +66,6 @@ const LandingPage: React.FC = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "white",
                 overflow: "hidden",
             }}
         >
