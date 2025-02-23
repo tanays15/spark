@@ -74,7 +74,7 @@ const LandingPage: React.FC = () => {
                 alignItems: "center",
                 justifyContent: "center",
                 overflow: "hidden",
-                bgcolor: "#252525",
+                bgcolor: "#121829",
             }}
         >
             <Container maxWidth="xl" sx={{ height: "100%" }}>
@@ -131,7 +131,7 @@ const LandingPage: React.FC = () => {
                                 maxWidth: "1300px",
                                 height: "95%", // Increased height for a longer slide
                                 p: 3,
-                                bgcolor: "#252525",
+                                bgcolor: "#262C44",
                                 color: "black",
                                 textAlign: "center",
                                 border: "2px solid #1c1c1c",
