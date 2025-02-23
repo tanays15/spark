@@ -9,7 +9,8 @@ from routes import register_routes
 app = Flask(__name__)
 app.config.from_object(Config)
 
-CORS(app)
+#CORS(app)
+CORS(app, origins=["http://127.0.0.1:5173"])
 
 # Initialize Database
 db.init_app(app)
