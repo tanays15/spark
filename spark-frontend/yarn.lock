@@ -1082,6 +1082,16 @@ dashify@^2.0.0:
   resolved "https://registry.npmjs.org/dashify/-/dashify-2.0.0.tgz"
   integrity sha512-hpA5C/YrPjucXypHPPc0oJ1l9Hf6wWbiOL7Ik42cxnsUOhWiCB/fylKbKqqJalW9FgkNQCw16YO8uW9Hs0Iy1A==
 
+date-fn@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.npmjs.org/date-fn/-/date-fn-0.0.2.tgz"
+  integrity sha512-DBIKrlB2w9d6UPZwYn6qqSeKLwHt5uRf9Mj/PiGWHGQ5CxnvMCx2KteO5owfiknkYzMngrDwz5nX4CGxYlr0uA==
+
+date-fns@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.npmjs.org/date-fns/-/date-fns-4.1.0.tgz"
+  integrity sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==
+
 debug@^4.1.0, debug@^4.3.1, debug@^4.3.2, debug@^4.3.4:
   version "4.4.0"
   resolved "https://registry.npmjs.org/debug/-/debug-4.4.0.tgz"

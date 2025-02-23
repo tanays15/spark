@@ -30,7 +30,7 @@ class VideoRecorder extends Component<{}, VideoRecorderState> {
 
   async componentDidMount() {
     try {
-      const response = await fetch('http://localhost:5000/topics', {
+      const response = await fetch('http://127.0.0.1:5000/topics', {
         method: 'GET'
       });
       const data = await response.json();
@@ -53,7 +53,7 @@ class VideoRecorder extends Component<{}, VideoRecorderState> {
       formData.append('topic', selectedTopic); // Append selected topic to form data
 
 
-      const response = await fetch('http://localhost:5000/records', {
+      const response = await fetch('http://127.0.0.1:5000/records', {
         method: 'POST',
         body: formData,
       });

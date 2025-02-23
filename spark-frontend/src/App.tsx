@@ -8,7 +8,8 @@ import Results from './pages/Results';
 import React from 'react'
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import theme from "./theme";
-import AnalyticsPage from "./pages/AnalyticsPage.tsx"; // Import theme file
+import AnalyticsPage from "./pages/AnalyticsPage.tsx";
+import Recording from "./pages/Recording.tsx"; // Import theme file
 
 function App() {
     return (
@@ -18,6 +19,7 @@ function App() {
          <Route path="/main" element={<MainPage />} />
          <Route path="/profile" element={<ProfilePage />} />
          <Route path="/analytics/:topic" element={<AnalyticsPage />}/>
+         <Route path="/record" element={<Recording />}/>
          <Route path="/logout" element={<Results />} />
       </Routes>
    );
