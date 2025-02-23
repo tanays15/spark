@@ -1,4 +1,3 @@
-import { useLocation, useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -34,7 +33,7 @@ const ProfilePage = () => {
             if (isAuthenticated && user) {
                 try {
                     const token = await getAccessTokenSilently(); // Get Auth0 access token (if needed)
-                    const response = await fetch("http://localhost:5000/users", {
+                    const response = await fetch("http://127.0.0.1:5000/users", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -64,7 +63,7 @@ const ProfilePage = () => {
             if (isAuthenticated && user) {
                 try {
                     const response = await fetch(
-                        `http://localhost:5000/topics?username=${user.name}`
+                        `http://127.0.0.1:5000/topics?username=${user.name}`
                     );
                     if (!response.ok) {
                         throw new Error("Failed to fetch data");
